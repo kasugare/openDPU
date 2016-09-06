@@ -1,0 +1,186 @@
+#!/usr/bin/Rscript
+
+options(warn=-1)
+sink('/dev/null')
+Sys.setlocale("LC_ALL","en_US.UTF-8")
+
+
+usePackage <- function(p) {
+  if (!is.element(p, installed.packages()[,1]))
+    install.packages(p, dep = TRUE)
+  require(p, character.only = TRUE)
+}
+
+r <- getOption("repos")
+r["CRAN"] <- "http://cran.us.r-project.org"
+options(repos = r)
+rm(r)
+lapply(c("RJSONIO",'ggplot2','plyr','lubridate','scales','reshape'),usePackage)
+
+library(plyr)
+library(reshape)
+library(lubridate)
+library(ggplot2)
+library(RJSONIO)
+
+library(NILM1Hz)
+#library(evaluateNILM)
+
+data.file <- readLines(file('stdin'))
+x=read.csv(data.file)
+names(x)=c('timestamp','voltage','current','active_power','reactive_power','apparent_power','power_factor')
+
+x$timestamp = as.numeric(x$timestamp)
+x$timestamp = as.POSIXct(x$timestamp,tz="Asia/Seoul",origin="1970-01-01")
+
+y = x #[!duplicated(x),]
+
+
+#
+#
+# --------------- Start Main Code -----------------------
+#
+#
+
+if( difftime( y$timestamp[ max(which(y$active_power > 10)) ],
+              y$timestamp[ min(which(y$active_power > 10)) ], units='hours') < 4 )
+  stop('Not enough data : cyclic')
+
+if( length(which(y$active_power < quantile( y$active_power, .05) + 10 )) / length(y$active_power) > .5 )
+  stop('Less than the base amount : cyclic')
+
+if( length(which(y$active_power < 0 )) / length(y$active_power) > .25 )
+  stop('Negative active power : cyclic')
+
+if( length(which(y$active_power < 10 )) / length(y$active_power) > .8 )
+  stop('No appliance : cyclic')
+
+
+#
+# Pattern scan
+#
+meta.list.pattern = list()
+meta.list.pattern <- tryCatch(
+{
+  generate.PatternScan.meta_1Hz(
+    data = y, genResolution.n = 30, genEffSize.n = 15, staPeriodicity.p = 0.1,
+    endEffSlot.p = 0.1, endConsistency.n = 1, clustering.method = 3, debug.mode = F)
+}, error = function(err) {
+  list()
+})
+
+#
+# Reduce resolution
+#
+if( length(meta.list.pattern)==0 ) {
+  resolutionMin = 1 # default 1-min
+  y.smoothing=smoothing(y,resolutionMin=resolutionMin)
+  meta.list.pattern <- tryCatch(
+  {
+    generate.PatternScan.meta_1Hz(
+      data = y.smoothing, genResolution.n = 20, genEffSize.n = 15, staPeriodicity.p = 0.1,
+      endEffSlot.p = 0.1, endConsistency.n = 1, clustering.method = 3, debug.mode = F)
+  }, error = function(err) {
+      list()
+  })
+  meta.list.pattern <- lapply(meta.list.pattern, function(x) {
+    x$generation_info$data_used$sampling <- resolutionMin * 60
+    return(x)
+  })
+}
+
+#
+#find heavy loads
+#
+meta.list.high = list()
+meta.list.high <- tryCatch(
+{
+  high.power.detect(y,max.iter=3,debug.mode=FALSE)
+}, error = function(err) {
+  list()
+})
+
+#
+# rice cooker
+#
+meta.list.warm = list()
+meta.list.warm <- tryCatch(
+{
+  list(generate.PatternScan.meta_summit_1Hz_Residual(data = y, Resolution = 1000, EffSize = 15, Periodicity = 0.1,Thres_Height = 20, Thres_Delta = 15, sign_flag = 2))
+}, error = function(err) {
+  list()
+})
+
+
+#
+# stanby power
+#
+meta.list.standby = list()
+meta.list.standby <- tryCatch(
+{
+  generate.StandbyPower.meta(y)
+}, error = function(err) {
+  list()
+})
+
+#
+# merge list
+#
+meta.list <- list()
+meta.list = append(meta.list,meta.list.standby)
+
+if( length(meta.list.warm) > 0 ) {
+  meta.list <- append(meta.list,meta.list.warm)
+}
+
+for( k in seq(meta.list.pattern) ){
+  rising_ap <- meta.list.pattern[[k]][['rising_edge']][['ap_med']]
+  falling_ap <- meta.list.pattern[[k]][['falling_edge']][['EffPwrDrop.med']]
+  rising_rp <- meta.list.pattern[[k]][['rising_edge']][['rp_med']]
+  falling_rp <- meta.list.pattern[[k]][['falling_edge']][['EffRP_Drop.med']]
+  sampling <- meta.list.pattern[[k]][['generation_info']][['data_used']][['sampling']]
+  
+  time_on <- meta.list.pattern[[k]][['falling_edge']][['EffTimeOn.med']]
+#  if( ((falling_ap-rising_ap)/rising_ap > 0.15 & time_on > 3600)
+#          || (falling_ap-rising_ap)/rising_ap > 1.0
+#          || ((rising_ap-falling_ap)/rising_ap > 0.3 & time_on > 3600)
+#          || time_on < 10 ) {
+  if( (falling_ap-rising_ap)/rising_ap > 0.15 
+      || (rising_ap-falling_ap)/rising_ap > 0.5
+      || abs(rising_rp-falling_rp)/rising_rp > 0.5
+      || (min(rising_rp,falling_rp) < 15 & time_on > (3600*3) )
+      || time_on < 10 ) {
+
+  }else {
+    meta.list = append(meta.list,list(meta.list.pattern[[k]]))
+  }
+}
+
+for( k in seq(meta.list.high) ){
+  rising_ap <- meta.list.high[[k]][['rising_edge']][['ap_height']]
+  falling_ap <- -1*meta.list.high[[k]][['falling_edge']][['ap_height']]
+  
+  if( rising_ap < 400 
+      || abs(rising_ap-falling_ap)/rising_ap > 0.25) {
+    
+  }else {
+    meta.list = append(meta.list,list(meta.list.high[[k]]))
+  }
+}
+
+if( length(meta.list) > 0 ) {
+  names(meta.list)=seq(0,length(meta.list)-1)
+  meta.list.json <- toJSON( meta.list,pretty=TRUE )
+}else{
+  meta.list.json <- ''
+}
+
+
+# 
+#
+# ------------------------- End Main Code -----------------------------
+#
+#
+sink()
+cat(meta.list.json)
+
