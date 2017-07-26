@@ -1,0 +1,2 @@
+pytz==2015.7
+rainbow_logging_handler==2.2.2

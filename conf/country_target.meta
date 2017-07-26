@@ -1,0 +1,13 @@
+[KR]
+device_channel   = 1
+device_frequency = 15
+nilm_frequency   = 15
+country_code     = KR
+timezone         = Asia/Seoul
+
+[JP]
+device_channel   = 2
+device_frequency = 10
+nilm_frequency   = 10
+country_code     = JP
+timezone         = Asia/Tokyo

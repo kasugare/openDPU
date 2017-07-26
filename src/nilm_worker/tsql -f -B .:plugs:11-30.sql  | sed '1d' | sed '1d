@@ -1,0 +1,55 @@
+tsql -f -B ./plugs/11-30.sql  | sed '1d' | sed '1d' | head -n -2 > 11-30.csv
+tsql -f -B ./plugs/12-01.sql  | sed '1d' | sed '1d' | head -n -2 > 12-01.csv
+tsql -f -B ./plugs/12-02.sql  | sed '1d' | sed '1d' | head -n -2 > 12-02.csv
+tsql -f -B ./plugs/12-03.sql  | sed '1d' | sed '1d' | head -n -2 > 12-03.csv
+tsql -f -B ./plugs/12-04.sql  | sed '1d' | sed '1d' | head -n -2 > 12-04.csv
+tsql -f -B ./plugs/12-05.sql  | sed '1d' | sed '1d' | head -n -2 > 12-05.csv
+tsql -f -B ./plugs/12-06.sql  | sed '1d' | sed '1d' | head -n -2 > 12-06.csv
+tsql -f -B ./plugs/12-07.sql  | sed '1d' | sed '1d' | head -n -2 > 12-07.csv
+tsql -f -B ./plugs/12-08.sql  | sed '1d' | sed '1d' | head -n -2 > 12-08.csv
+tsql -f -B ./plugs/12-09.sql  | sed '1d' | sed '1d' | head -n -2 > 12-09.csv
+tsql -f -B ./plugs/12-10.sql  | sed '1d' | sed '1d' | head -n -2 > 12-10.csv
+tsql -f -B ./plugs/12-11.sql  | sed '1d' | sed '1d' | head -n -2 > 12-11.csv
+tsql -f -B ./plugs/12-12.sql  | sed '1d' | sed '1d' | head -n -2 > 12-12.csv
+tsql -f -B ./plugs/12-13.sql  | sed '1d' | sed '1d' | head -n -2 > 12-13.csv
+tsql -f -B ./plugs/12-14.sql  | sed '1d' | sed '1d' | head -n -2 > 12-14.csv
+tsql -f -B ./plugs/12-15.sql  | sed '1d' | sed '1d' | head -n -2 > 12-15.csv
+tsql -f -B ./plugs/12-16.sql  | sed '1d' | sed '1d' | head -n -2 > 12-16.csv
+tsql -f -B ./plugs/12-17.sql  | sed '1d' | sed '1d' | head -n -2 > 12-17.csv
+tsql -f -B ./plugs/12-18.sql  | sed '1d' | sed '1d' | head -n -2 > 12-18.csv
+tsql -f -B ./plugs/12-19.sql  | sed '1d' | sed '1d' | head -n -2 > 12-19.csv
+tsql -f -B ./plugs/12-20.sql  | sed '1d' | sed '1d' | head -n -2 > 12-20.csv
+tsql -f -B ./plugs/12-21.sql  | sed '1d' | sed '1d' | head -n -2 > 12-21.csv
+tsql -f -B ./plugs/12-22.sql  | sed '1d' | sed '1d' | head -n -2 > 12-22.csv
+tsql -f -B ./plugs/12-23.sql  | sed '1d' | sed '1d' | head -n -2 > 12-23.csv
+tsql -f -B ./plugs/12-24.sql  | sed '1d' | sed '1d' | head -n -2 > 12-24.csv
+tsql -f -B ./plugs/12-25.sql  | sed '1d' | sed '1d' | head -n -2 > 12-25.csv
+tsql -f -B ./plugs/12-26.sql  | sed '1d' | sed '1d' | head -n -2 > 12-26.csv
+tsql -f -B ./plugs/12-27.sql  | sed '1d' | sed '1d' | head -n -2 > 12-27.csv
+tsql -f -B ./plugs/12-28.sql  | sed '1d' | sed '1d' | head -n -2 > 12-28.csv
+tsql -f -B ./plugs/12-29.sql  | sed '1d' | sed '1d' | head -n -2 > 12-29.csv
+tsql -f -B ./plugs/12-30.sql  | sed '1d' | sed '1d' | head -n -2 > 12-30.csv
+tsql -f -B ./plugs/12-31.sql  | sed '1d' | sed '1d' | head -n -2 > 12-31.csv
+
+
+SELECT sid, did, dts, vrmsa0, irms0, watt0_0/1000. AS watt0_0, watt0_1/1000. AS watt0_1, watt0_2/1000. AS watt0_2, watt0_3/1000. AS watt0_3, watt0_4/1000. AS watt0_4, watt0_5/1000. AS watt0_5, watt0_6/1000. AS watt0_6, watt0_7/1000. AS watt0_7, watt0_8/1000. AS watt0_8, watt0_9/1000. AS watt0_9, var0_0/1000. AS var0_0, var0_1/1000. AS var0_1, var0_2/1000. AS var0_2, var0_3/1000. AS var0_3, var0_4/1000. AS var0_4, var0_5/1000. AS var0_5, var0_6/1000. AS var0_6, var0_7/1000. AS var0_7, var0_8/1000. AS var0_8, var0_9/1000. AS var0_9 FROM plug_201  WHERE dts >= 1480518000000 AND dts <= 1483196399999 AND csv_year in ('2016') AND csv_month in ('11') AND csv_day in ('30') order by dts
+
+SELECT sid, did, dts, vrmsa0, irms0, watt0_0/1000. AS watt0_0, watt0_1/1000. AS watt0_1, watt0_2/1000. AS watt0_2, watt0_3/1000. AS watt0_3, watt0_4/1000. AS watt0_4, watt0_5/1000. AS watt0_5, watt0_6/1000. AS watt0_6, watt0_7/1000. AS watt0_7, watt0_8/1000. AS watt0_8, watt0_9/1000. AS watt0_9, var0_0/1000. AS var0_0, var0_1/1000. AS var0_1, var0_2/1000. AS var0_2, var0_3/1000. AS var0_3, var0_4/1000. AS var0_4, var0_5/1000. AS var0_5, var0_6/1000. AS var0_6, var0_7/1000. AS var0_7, var0_8/1000. AS var0_8, var0_9/1000. AS var0_9 FROM plug_201  WHERE dts >= 1480518000000 AND dts <= 1483196399999 AND csv_year in ('2016') AND csv_month in ('12') AND csv_day in ('01','02','03') order by dts
+
+SELECT sid, did, dts, vrmsa0, irms0, watt0_0/1000. AS watt0_0, watt0_1/1000. AS watt0_1, watt0_2/1000. AS watt0_2, watt0_3/1000. AS watt0_3, watt0_4/1000. AS watt0_4, watt0_5/1000. AS watt0_5, watt0_6/1000. AS watt0_6, watt0_7/1000. AS watt0_7, watt0_8/1000. AS watt0_8, watt0_9/1000. AS watt0_9, var0_0/1000. AS var0_0, var0_1/1000. AS var0_1, var0_2/1000. AS var0_2, var0_3/1000. AS var0_3, var0_4/1000. AS var0_4, var0_5/1000. AS var0_5, var0_6/1000. AS var0_6, var0_7/1000. AS var0_7, var0_8/1000. AS var0_8, var0_9/1000. AS var0_9 FROM plug_201  WHERE dts >= 1480518000000 AND dts <= 1483196399999 AND csv_year in ('2016') AND csv_month in ('12') AND csv_day in ('04','05','06') order by dts
+
+SELECT sid, did, dts, vrmsa0, irms0, watt0_0/1000. AS watt0_0, watt0_1/1000. AS watt0_1, watt0_2/1000. AS watt0_2, watt0_3/1000. AS watt0_3, watt0_4/1000. AS watt0_4, watt0_5/1000. AS watt0_5, watt0_6/1000. AS watt0_6, watt0_7/1000. AS watt0_7, watt0_8/1000. AS watt0_8, watt0_9/1000. AS watt0_9, var0_0/1000. AS var0_0, var0_1/1000. AS var0_1, var0_2/1000. AS var0_2, var0_3/1000. AS var0_3, var0_4/1000. AS var0_4, var0_5/1000. AS var0_5, var0_6/1000. AS var0_6, var0_7/1000. AS var0_7, var0_8/1000. AS var0_8, var0_9/1000. AS var0_9 FROM plug_201  WHERE dts >= 1480518000000 AND dts <= 1483196399999 AND csv_year in ('2016') AND csv_month in ('12') AND csv_day in ('07','08','09') order by dts
+
+SELECT sid, did, dts, vrmsa0, irms0, watt0_0/1000. AS watt0_0, watt0_1/1000. AS watt0_1, watt0_2/1000. AS watt0_2, watt0_3/1000. AS watt0_3, watt0_4/1000. AS watt0_4, watt0_5/1000. AS watt0_5, watt0_6/1000. AS watt0_6, watt0_7/1000. AS watt0_7, watt0_8/1000. AS watt0_8, watt0_9/1000. AS watt0_9, var0_0/1000. AS var0_0, var0_1/1000. AS var0_1, var0_2/1000. AS var0_2, var0_3/1000. AS var0_3, var0_4/1000. AS var0_4, var0_5/1000. AS var0_5, var0_6/1000. AS var0_6, var0_7/1000. AS var0_7, var0_8/1000. AS var0_8, var0_9/1000. AS var0_9 FROM plug_201  WHERE dts >= 1480518000000 AND dts <= 1483196399999 AND csv_year in ('2016') AND csv_month in ('12') AND csv_day in ('10','11','12') order by dts
+
+SELECT sid, did, dts, vrmsa0, irms0, watt0_0/1000. AS watt0_0, watt0_1/1000. AS watt0_1, watt0_2/1000. AS watt0_2, watt0_3/1000. AS watt0_3, watt0_4/1000. AS watt0_4, watt0_5/1000. AS watt0_5, watt0_6/1000. AS watt0_6, watt0_7/1000. AS watt0_7, watt0_8/1000. AS watt0_8, watt0_9/1000. AS watt0_9, var0_0/1000. AS var0_0, var0_1/1000. AS var0_1, var0_2/1000. AS var0_2, var0_3/1000. AS var0_3, var0_4/1000. AS var0_4, var0_5/1000. AS var0_5, var0_6/1000. AS var0_6, var0_7/1000. AS var0_7, var0_8/1000. AS var0_8, var0_9/1000. AS var0_9 FROM plug_201  WHERE dts >= 1480518000000 AND dts <= 1483196399999 AND csv_year in ('2016') AND csv_month in ('12') AND csv_day in ('13','14','15') order by dts
+
+SELECT sid, did, dts, vrmsa0, irms0, watt0_0/1000. AS watt0_0, watt0_1/1000. AS watt0_1, watt0_2/1000. AS watt0_2, watt0_3/1000. AS watt0_3, watt0_4/1000. AS watt0_4, watt0_5/1000. AS watt0_5, watt0_6/1000. AS watt0_6, watt0_7/1000. AS watt0_7, watt0_8/1000. AS watt0_8, watt0_9/1000. AS watt0_9, var0_0/1000. AS var0_0, var0_1/1000. AS var0_1, var0_2/1000. AS var0_2, var0_3/1000. AS var0_3, var0_4/1000. AS var0_4, var0_5/1000. AS var0_5, var0_6/1000. AS var0_6, var0_7/1000. AS var0_7, var0_8/1000. AS var0_8, var0_9/1000. AS var0_9 FROM plug_201  WHERE dts >= 1480518000000 AND dts <= 1483196399999 AND csv_year in ('2016') AND csv_month in ('12') AND csv_day in ('16','17','18') order by dts
+
+SELECT sid, did, dts, vrmsa0, irms0, watt0_0/1000. AS watt0_0, watt0_1/1000. AS watt0_1, watt0_2/1000. AS watt0_2, watt0_3/1000. AS watt0_3, watt0_4/1000. AS watt0_4, watt0_5/1000. AS watt0_5, watt0_6/1000. AS watt0_6, watt0_7/1000. AS watt0_7, watt0_8/1000. AS watt0_8, watt0_9/1000. AS watt0_9, var0_0/1000. AS var0_0, var0_1/1000. AS var0_1, var0_2/1000. AS var0_2, var0_3/1000. AS var0_3, var0_4/1000. AS var0_4, var0_5/1000. AS var0_5, var0_6/1000. AS var0_6, var0_7/1000. AS var0_7, var0_8/1000. AS var0_8, var0_9/1000. AS var0_9 FROM plug_201  WHERE dts >= 1480518000000 AND dts <= 1483196399999 AND csv_year in ('2016') AND csv_month in ('12') AND csv_day in ('19','20','21') order by dts
+
+SELECT sid, did, dts, vrmsa0, irms0, watt0_0/1000. AS watt0_0, watt0_1/1000. AS watt0_1, watt0_2/1000. AS watt0_2, watt0_3/1000. AS watt0_3, watt0_4/1000. AS watt0_4, watt0_5/1000. AS watt0_5, watt0_6/1000. AS watt0_6, watt0_7/1000. AS watt0_7, watt0_8/1000. AS watt0_8, watt0_9/1000. AS watt0_9, var0_0/1000. AS var0_0, var0_1/1000. AS var0_1, var0_2/1000. AS var0_2, var0_3/1000. AS var0_3, var0_4/1000. AS var0_4, var0_5/1000. AS var0_5, var0_6/1000. AS var0_6, var0_7/1000. AS var0_7, var0_8/1000. AS var0_8, var0_9/1000. AS var0_9 FROM plug_201  WHERE dts >= 1480518000000 AND dts <= 1483196399999 AND csv_year in ('2016') AND csv_month in ('12') AND csv_day in ('22','23','24') order by dts
+
+SELECT sid, did, dts, vrmsa0, irms0, watt0_0/1000. AS watt0_0, watt0_1/1000. AS watt0_1, watt0_2/1000. AS watt0_2, watt0_3/1000. AS watt0_3, watt0_4/1000. AS watt0_4, watt0_5/1000. AS watt0_5, watt0_6/1000. AS watt0_6, watt0_7/1000. AS watt0_7, watt0_8/1000. AS watt0_8, watt0_9/1000. AS watt0_9, var0_0/1000. AS var0_0, var0_1/1000. AS var0_1, var0_2/1000. AS var0_2, var0_3/1000. AS var0_3, var0_4/1000. AS var0_4, var0_5/1000. AS var0_5, var0_6/1000. AS var0_6, var0_7/1000. AS var0_7, var0_8/1000. AS var0_8, var0_9/1000. AS var0_9 FROM plug_201  WHERE dts >= 1480518000000 AND dts <= 1483196399999 AND csv_year in ('2016') AND csv_month in ('12') AND csv_day in ('25','26','27') order by dts
+
+SELECT sid, did, dts, vrmsa0, irms0, watt0_0/1000. AS watt0_0, watt0_1/1000. AS watt0_1, watt0_2/1000. AS watt0_2, watt0_3/1000. AS watt0_3, watt0_4/1000. AS watt0_4, watt0_5/1000. AS watt0_5, watt0_6/1000. AS watt0_6, watt0_7/1000. AS watt0_7, watt0_8/1000. AS watt0_8, watt0_9/1000. AS watt0_9, var0_0/1000. AS var0_0, var0_1/1000. AS var0_1, var0_2/1000. AS var0_2, var0_3/1000. AS var0_3, var0_4/1000. AS var0_4, var0_5/1000. AS var0_5, var0_6/1000. AS var0_6, var0_7/1000. AS var0_7, var0_8/1000. AS var0_8, var0_9/1000. AS var0_9 FROM plug_201  WHERE dts >= 1480518000000 AND dts <= 1483196399999 AND csv_year in ('2016') AND csv_month in ('12') AND csv_day in ('28','29','30','31') order by dts

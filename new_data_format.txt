@@ -1,0 +1,53 @@
+
+collectionTypeInfo : {15: [10010592]}
+metaSearchSids     : {15: [10010592]}
+updateDevcieInfo   : {'10010592_12556': {'status': 'active', 'rawdata_freq': 15, 'updateTS': 1453955639070, 'nilm_freq': 15}}
+
+1. paramsMap : {'usage': {'sids': {15: [10010592]}, 'startTS': 1463324400000, 'endTS': 1463410799999, 'analysis': ['usage']}, 'proto': 'REQ_NILM_DATA'}
+
+paramsMap : {
+    'proto': 'REQ_NILM_DATA',
+    'usage': {
+        'sids': {
+            15: [10010592, ...]
+        },
+        'startTS': 1463324400000,
+        'endTS': 1463410799999,
+        'analysis': ['usage']
+    }
+}
+
+2. paramsMap : {
+    'proto': 'REQ_NILM_DATA',
+    'use': 'NILM',
+    'offer': 'HDFS',
+    'params': {
+        'sids': {15: [10010592]},
+        'startTS': 1463324400000,
+        'endTS': 1463410799999,
+        'analysis': ['usage']
+    },
+    'device': 'edm3',
+    'collector': 'TAJO'
+}
+
+
+paramsMap : {
+    'proto' : 'REQ_NILM_DATA',
+    'jobType' : 'nilm',
+    'params': {
+        'analysis' : 'usage', # ('usage','meta','update','candidate')
+        'startTS' : startTS,
+        'endTS' : endTS,
+        'target' : {
+            hz : {
+                sid : did,
+                sid : did,
+                sid : did,
+            }
+        }
+    },
+    'offer' : 'HDFS',
+    'device': 'edm3',
+    'collector': 'TAJO'
+}

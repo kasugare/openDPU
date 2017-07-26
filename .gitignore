@@ -52,15 +52,14 @@ docs/_build/
 # PyBuilder
 target/
 
-# ETC Directories
+# ETC
 *.swp
 data/
 .idea/
 log/
 logs/
 report/
-
-# ETC Files
+client/python/src/*.pyc
 *.pyc
 *.csv
 libs/
