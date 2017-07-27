@@ -2,14 +2,10 @@
 # -*- coding: utf-8 -*-
 
 from common.util_logger import Logger
-from protocol.message_pool.MessageGenerator import genResHB, genReqResourceStat, genReqJobCompelted, genReqJobFail, genStubNilmMlJobSuccess, genStubNilmMlJobFail
-from nilm_worker.job_container.tajo_gateway.NilmDataGenerator import NilmDataGenerator
-from nilm_worker.job_container.nilm.NilmRunner import NilmRunner
-from nilm_worker.job_container.nilm_status_checker.NilmStatusChecker import NilmStatusChecker
-from nilm_worker.job_container.nilm_learner_scheduler.LearnerScheduler import LearnerScheduler
-from nilm_worker.job_container.nilm_machine_learning.NilmMachineLearning import NilmMachineLearning
+from protocol.message_pool.MessageGenerator import genResHB, genReqResourceStat, genReqJobCompelted, genReqJobFail, genStubDpuMlJobSuccess, genStubDpuMlJobFail
 from protocol.message_pool.MessageGenerator import genReqTajoEnable
 from tcp_modules.NetworkHandler import DataSender
+from dpu_worker.job_container.data_etl.DataEtlManager import DataEtlManager
 from ProtocolAnalyzer import ProtocolAnalyzer
 from multiprocessing import Process
 from threading import Thread, Lock
@@ -38,16 +34,13 @@ class JobWorkersHandler(ProtocolAnalyzer):
 			os.kill(pid, signal.SIGTERM)
 
 	def __initLogger__(self):
-		self._rLogger = Logger("R_CORE").getLogger()
-		self._statusLogger = Logger('NILM_STATUS').getLogger()
-		self._learnerLogger = Logger('LEARNER_SCHEDULER').getLogger()
-		self._mlLogger = Logger('NILM_MACHINE_LEARNING').getLogger()
-		self._tajoGatewayLogger = Logger('TAJO_GATEWAY').getLogger()
+		self._statusLogger = Logger('DPU_STATUS').getLogger()
+		self._dataEtlLogger= Logger('DATA_ETL').getLogger()
 
 	def initPorcess(self):
 		totalCpu = self._resourceManager.getTotalCpu()
 		publicCpu = self._resourceManager.getPublicCpu()
-		
+
 		sendThread = Thread(target=self._runDataSender, args=(self._sender, self._sendMessageQ))
 		sendThread.setDaemon(1)
 		sendThread.start()
@@ -93,41 +86,20 @@ class JobWorkersHandler(ProtocolAnalyzer):
 				self._logger.debug('- available cpu : %d' %self._resourceManager.getAvailCpu())
 				self._sendMessageQ.put_nowait(genResHB())
 
-			elif proto == 'REQ_GEN_NILM_RAW_DATA':
+			elif proto == 'REQ_GEN_DPU_RAW_DATA':
 				self._logger.debug('- crete job process, job type : %s' %jobType)
-				jobThread = Thread(target=self._runNilmDataGenerator, args=(processType, jobId, jobType, message))
-
-			elif proto == 'REQ_NILM_DATA':
-				self._logger.debug('- crete job process, job type : %s' %jobType)
-				jobThread = Thread(target=self._runNilmJobProcess, args=(processType, jobId, jobType, message))
-
-			elif proto == 'REQ_NILM_STATUS_CHECK':
-				self._logger.debug('- crete job process, job type : %s' %jobType)
-				jobThread = Thread(target=self._runNilmStatusChecker, args=(processType, jobId, jobType, message))
-
-			elif proto == 'REQ_NILM_LEARN_SCHEDULE':
-				self._logger.debug('- crete job process, job type : %s' %jobType)
-				jobThread = Thread(target=self._runLearnScheduler, args=(processType, jobId, jobType))
-
-			elif proto == 'REQ_STUB_NILM_ML':
-				self._logger.debug('- crete job process, job type : %s' %jobType)
-				stubId = message['stubId']
-				params = message['params']
-				processInfo = message['processInfo']
-				mlProcess = Process(target=self._runNilmMarchinLearingForPredict, args=(stubId, params, processInfo))
-				self._MlSubprocessTable[mlProcess.pid] = mlProcess
-				mlProcess.start()
+				jobThread = Thread(target=self._runDpuDataGenerator, args=(processType, jobId, jobType, message))
 
 			if jobThread:
 				jobThread.setDaemon(1)
 				jobThread.start()
 
 
-	def _runNilmDataGenerator(self, processType, jobId, jobType, message):
+	def _runDpuDataGenerator(self, processType, jobId, jobType, message):
 		self._resourceManager.assignCpuByProcessType(processType)
 		try:
-			dataGenerator = NilmDataGenerator(self._tajoGatewayLogger, self._sendMessageQ)
-			dataGenerator.doProcess(jobType, message)
+			dataEtlManager = DataEtlManager(self._dataEtlLogger)
+			dataEtlManager.doProcess()
 
 			self._resourceManager.returnCpuByProcessType(processType)
 			sendMessage = genReqJobCompelted(jobId, availCpu=self._resourceManager.getAvailCpu(), jobType=jobType, processType=processType)
@@ -138,89 +110,3 @@ class JobWorkersHandler(ProtocolAnalyzer):
 			self._sendMessageQ.put_nowait(sendMessage)
 			self._logger.error("# Job task be failed.")
 			self._logger.exception(e)
-
-
-	def _runNilmJobProcess(self, processType, jobId, jobType, message):
-		paramElements = ['analysisType', 'startTS', 'endTS', 'sid', 'did', 'lfid', 'filePath']
-		if not message.has_key('params'):
-			self._logger.warn("# This job task is wrong params. this job failed.")
-			return
-		params = message['params']
-		for element in paramElements:
-			if not params.has_key(element):
-				self._logger.warn("# This job task is wrong params. this job failed.")
-				return
-
-		self._resourceManager.assignCpuByProcessType(processType)
-		try:
-			self._logger.info('# [%s] Do process nilm jobs,  analysis type : %s' %(jobId, params['analysisType']))
-
-			nilmRunner = NilmRunner(self._logger, self._rLogger, jobId, self._outputQ, self._sendMessageQ)
-			nilmRunner.doProcess(params)
-
-			self._resourceManager.returnCpuByProcessType(processType)
-			sendMessage = genReqJobCompelted(jobId, availCpu=self._resourceManager.getAvailCpu(), jobType="NILM_RUN", processType=processType)
-			self._sendMessageQ.put_nowait(sendMessage)
-		except Exception, e:
-			self._resourceManager.returnCpuByProcessType(processType)
-			sendMessage = genReqJobFail(jobId, availCpu=self._resourceManager.getAvailCpu(), message=message, error=str(e), processType=processType)
-			self._sendMessageQ.put_nowait(sendMessage)
-			self._logger.error("# Job task be failed.")
-			self._logger.exception(e)
-			
-
-	def _runNilmStatusChecker(self, processType, jobId, jobType, message):
-		self._resourceManager.assignCpuByProcessType(processType)
-		try:
-			statusChecker = NilmStatusChecker(logger=self._statusLogger)
-			statusChecker.doProcess(jobType, message)
-
-			self._resourceManager.returnCpuByProcessType(processType)
-			sendMessage = genReqTajoEnable(jobType)
-			self._sendMessageQ.put_nowait(sendMessage)
-			sendMessage = genReqJobCompelted(jobId, availCpu=self._resourceManager.getAvailCpu(), jobType=jobType, processType=processType)
-			self._sendMessageQ.put_nowait(sendMessage)
-		except Exception, e:
-			self._resourceManager.returnCpuByProcessType(processType)
-			sendMessage = genReqJobFail(jobId, availCpu=self._resourceManager.getAvailCpu(), message=message, error=str(e), processType=processType)
-			self._sendMessageQ.put_nowait(sendMessage)
-			self._logger.error("# Job task be failed.")
-			self._logger.exception(e)
-
-
-	def _runLearnScheduler(self, processType, jobId, jobType):
-		self._resourceManager.assignCpuByProcessType(processType)
-		try:
-			loadBalancer = LearnerScheduler(logger=self._learnerLogger)
-			loadBalancer.doProcess()
-
-			self._resourceManager.returnCpuByProcessType(processType)
-			sendMessage = genReqJobCompelted(jobId, availCpu=self._resourceManager.getAvailCpu(), jobType=jobType, processType=processType)
-			self._sendMessageQ.put_nowait(sendMessage)
-		except Exception, e:
-			self._resourceManager.returnCpuByProcessType(processType)
-			sendMessage = genReqJobFail(jobId, availCpu=self._resourceManager.getAvailCpu(), message=message, error=str(e), processType=processType)
-			self._sendMessageQ.put_nowait(sendMessage)
-			self._logger.error("# Job task be failed.")
-			self._logger.exception(e)
-
-	def _runNilmMarchinLearingForPredict(self, stubId, params, processInfo):
-		try:
-			machineLearning = NilmMachineLearning(logger=self._mlLogger)
-			nilmOutput = machineLearning.doProcess(processInfo, params)
-			
-			resultMessage = genStubNilmMlJobSuccess(stubId, nilmOutput)
-			resultMessage['processInfo'] = processInfo
-			self._stubResultQ.put_nowait(resultMessage)
-		except Exception, e:
-			self._logger.error("# Job task be failed.")
-			self._logger.exception(e)
-			result = {
-				"processInfo": processInfo,
-				"result": params,
-				"error": e
-			}
-			resultMessage = genStubNilmMlJobFail(stubId, result)
-			resultMessage['processInfo'] = processInfo
-			self._stubResultQ.put_nowait("Fail")
-		# os.kill(os.getpid(), signal.SIGTERM)

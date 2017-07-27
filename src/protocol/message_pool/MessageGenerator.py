@@ -38,16 +38,16 @@ def genResVersion(versionInfo):
 	}
 	return message
 
-# Nilm Groups Info
-def genResNilmGroupInfo(nilmGroupInfo):
+# Dpu Groups Info
+def genResDpuGroupInfo(dpuGroupInfo):
 	message = {
 		'proto': 'RES_GROUP_INFO',
-		'nilmGroupInfo': nilmGroupInfo
+		'dpuGroupInfo': dpuGroupInfo
 	}
 	return message
 
-# Nilm Output Check Info
-def genResNilmOutputCheckInfo(checkedOutputResultSet):
+# Dpu Output Check Info
+def genResDpuOutputCheckInfo(checkedOutputResultSet):
 	message = {
 		'proto': 'RES_OUTPUT_CHECK',
 		'outputCheckInfo': checkedOutputResultSet
@@ -109,16 +109,16 @@ def genResStatus(processRate, totalMem, usedMem, jobs):
 	return message
 
 # Data Protocol
-def genReqNilmRawData(params):
+def genReqDpuRawData(params):
 	message = {
-		'proto': 'REQ_NILM_RAW_DATA',
+		'proto': 'REQ_DPU_RAW_DATA',
 		'params': params
 	}
 	return message
 
-def genReqNilmStatusCheck(collectorType, jobType, params={}):
+def genReqDpuStatusCheck(collectorType, jobType, params={}):
 	message = {
-		'proto': 'REQ_NILM_STATUS_CHECK',
+		'proto': 'REQ_DPU_STATUS_CHECK',
 		'collector': collectorType,
 		'jobType': jobType,
 		'retry': 0,
@@ -126,9 +126,9 @@ def genReqNilmStatusCheck(collectorType, jobType, params={}):
 	}
 	return message
 
-def genReqGenNilmRawData(collectorType, deviceType, jobType, offerType, params={}):
+def genReqGenDpuRawData(collectorType, deviceType, jobType, offerType, params={}):
 	message = {
-		'proto': 'REQ_GEN_NILM_RAW_DATA',
+		'proto': 'REQ_GEN_DPU_RAW_DATA',
 		'collector': collectorType,
 		'device': deviceType,
 		'jobType': jobType,
@@ -138,9 +138,9 @@ def genReqGenNilmRawData(collectorType, deviceType, jobType, offerType, params={
 	}
 	return message
 
-def genReqNilmLearnerSchedule(jobType, params={}):
+def genReqDpuLearnerSchedule(jobType, params={}):
 	message = {
-		'proto': 'REQ_NILM_LEARN_SCHEDULE',
+		'proto': 'REQ_DPU_LEARN_SCHEDULE',
 		'jobType': jobType,
 		'params': params,
 		'retry': 0,
@@ -149,9 +149,9 @@ def genReqNilmLearnerSchedule(jobType, params={}):
 	return message
 
 
-def genReqNilmData(collectorType, deviceType, jobType, offerType, params={}):
+def genReqDpuData(collectorType, deviceType, jobType, offerType, params={}):
 	message = {
-		'proto': 'REQ_NILM_DATA',
+		'proto': 'REQ_DPU_DATA',
 		'collector': collectorType,
 		'device': deviceType,
 		'jobType': jobType,
@@ -161,9 +161,9 @@ def genReqNilmData(collectorType, deviceType, jobType, offerType, params={}):
 	}
 	return message
 
-def genResNilmData(jobType, offerType, result, dataSet='SINGLE'):
+def genResDpuData(jobType, offerType, result, dataSet='SINGLE'):
 	message = {
-		'proto': 'RES_NILM_DATA',
+		'proto': 'RES_DPU_DATA',
 		# 'dataset': dataSet,
 		'jobType': jobType,
 		'offer': offerType,
@@ -225,7 +225,7 @@ def genReqJobFail(jobId, availCpu, message, error='', processType=None):
 #'''result = {'meta':{1:{sid:hdfs_path,...}, 15:{sid:hdfs_path,...}}, 'usage':{1:{sid:hdfs_path,..}, 15:{sid:hdfs_path,...}}}'''
 def genResTajoData(jobType, offerType, params, dataSet='SINGLE'):
 	message = {
-		'proto': 'RES_NILM_DATA',
+		'proto': 'RES_DPU_DATA',
 		'jobType': jobType,
 		'offer': offerType,
 		'retry': 0,
@@ -233,17 +233,17 @@ def genResTajoData(jobType, offerType, params, dataSet='SINGLE'):
 	}
 	return message
 
-def genStubNilmMlJobSuccess(stubId, result):
+def genStubDpuMlJobSuccess(stubId, result):
 	message = {
-		'proto': 'RES_STUB_NILM_ML_SUCCESS',
+		'proto': 'RES_STUB_DPU_ML_SUCCESS',
 		'stubId': stubId,
 		'result': result
 	}
 	return message
 
-def genStubNilmMlJobFail(stubId, result):
+def genStubDpuMlJobFail(stubId, result):
 	message = {
-		'proto': 'RES_STUB_NILM_ML_FAIL',
+		'proto': 'RES_STUB_DPU_ML_FAIL',
 		'stubId': stubId,
 		'result': result
 	}

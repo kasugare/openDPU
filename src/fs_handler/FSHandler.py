@@ -79,12 +79,12 @@ class FSHandler:
 				self._logger.exception(e)
 		return tmpUsageFiles
 
-	def saveNilmMetaInfoToFile(self, fileName, metaInfo):
+	def saveDpuMetaInfoToFile(self, fileName, metaInfo):
 		tmpLocalPath = getLocalTmpPath()
 		fileName = os.path.basename(fileName)
 		metaFileName = 'meta_%s_%d.json' %(fileName.split('.')[1], self._getUniqTimeNum())
 		localTempFilePath = '%s/%s' %(tmpLocalPath, metaFileName)
-		self._logger.debug('# Save nilm meta info to file for nilm usage. file path : %s' %(localTempFilePath))
+		self._logger.debug('# Save dpu meta info to file for dpu usage. file path : %s' %(localTempFilePath))
 		try:
 			fd = open(localTempFilePath, 'w')
 			fd.write(json.dumps(metaInfo))
@@ -98,7 +98,7 @@ class FSHandler:
 		tmpLocalPath = getLocalTmpPath()
 		siteInfoFileName = 'siteinfo_%d_%s_%d.json' %(sid, countryCode, self._getUniqTimeNum())
 		localTempFilePath = '%s/%s' %(tmpLocalPath, siteInfoFileName)
-		self._logger.debug('# Save nilm meta info to file for nilm usage. file path : %s' %(localTempFilePath))
+		self._logger.debug('# Save dpu meta info to file for dpu usage. file path : %s' %(localTempFilePath))
 		siteInfoMap = {
 			'site_id': str(sid),
 			'country': countryCode,

@@ -53,17 +53,17 @@ def getLocalTmpPath(confName = 'TEMP_FILE_PATH'):
 	localTmpPath = conf.get(confName, 'local_tmp_path').split(',')[0]
 	return localTmpPath
 
-def getHdfsNilmPath(confName = 'NILM_RAWDATA_PATH'):
+def getHdfsDpuPath(confName = 'DPU_RAWDATA_PATH'):
 	conf = getConfig()
-	hdfsNilmPath = conf.get(confName, 'hdfs_nilm_path').split(',')[0]
-	return hdfsNilmPath
+	hdfsDpuPath = conf.get(confName, 'hdfs_dpu_path').split(',')[0]
+	return hdfsDpuPath
 
-def getHdfsMlWeightDirPath(confName = 'NILM_ML_WEIGHT'):
+def getHdfsMlWeightDirPath(confName = 'DPU_ML_WEIGHT'):
 	conf = getConfig()
-	hdfsNilmPath = conf.get(confName, 'hdfs_weight_path').split(',')[0]
-	return hdfsNilmPath
+	hdfsDpuPath = conf.get(confName, 'hdfs_weight_path').split(',')[0]
+	return hdfsDpuPath
 
-def getHdfsMlTempDirPath(confName = 'NILM_ML_TEMP_PATH'):
+def getHdfsMlTempDirPath(confName = 'DPU_ML_TEMP_PATH'):
 	conf = getConfig()
 	mlTempDirPath = conf.get(confName, 'ml_temp_path').split(',')[0]
 	return mlTempDirPath

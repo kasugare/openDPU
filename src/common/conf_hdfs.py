@@ -31,7 +31,7 @@ def getHdfsInfo(confName = 'HDFS'):
 	return hdfsHosts, user
 
 
-def getHdfsNilmPath(confName = 'NILM_RAWDATA_PATH'):
+def getHdfsDpuPath(confName = 'DPU_RAWDATA_PATH'):
 	conf = getConfig()
-	hdfsNilmPath = conf.get(confName, 'hdfs_nilm_path').split(',')[0]
-	return hdfsNilmPath
+	hdfsDpuPath = conf.get(confName, 'hdfs_dpu_path').split(',')[0]
+	return hdfsDpuPath

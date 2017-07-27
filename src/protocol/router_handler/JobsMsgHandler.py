@@ -4,7 +4,7 @@
 from common.util_common import cvtWorkerId
 from common.conf_system import getHeartBeatIntervalTime, getJobRetryCount
 from protocol.message_pool.MessageGenerator import genResHB, genReqJobData
-from nilm_master.health_manager.HealthChecker import HealthChecker
+from dpu_master.health_manager.HealthChecker import HealthChecker
 from ProtocolAnalyzer import ProtocolAnalyzer
 from threading import Thread, Lock
 import Queue
@@ -52,8 +52,8 @@ class JobsMsgHandler(ProtocolAnalyzer):
 					self._resourceHandler.addInitWorker(self._workerObj, totalCpu=totalCpu, publicCpu=publicCpu)
 					self._genSubProcess(jobType = 'health_check')
 
-				elif proto == 'RES_NILM_DATA' or proto == 'REQ_NILM_DATA':
-					message['proto'] = 'REQ_NILM_DATA'
+				elif proto == 'RES_DPU_DATA' or proto == 'REQ_DPU_DATA':
+					message['proto'] = 'REQ_DPU_DATA'
 					if message.has_key('params') and message['params'].has_key('analysisType'):
 						analysisType = message['params']['analysisType']
 						self._logger.debug("# JMS : [%s] %s - analysisType : %s"%(self._workerId, proto, analysisType))
@@ -64,8 +64,8 @@ class JobsMsgHandler(ProtocolAnalyzer):
 						elif analysisType == 'metaUpdate':
 						 	self._resourceHandler.addPrivateJob((3,message))
 
-				elif proto == 'RES_NILM_ML_DATA':
-					message['proto'] = 'REQ_NILM_ML_DATA'
+				elif proto == 'RES_DPU_ML_DATA':
+					message['proto'] = 'REQ_DPU_ML_DATA'
 					self._resourceHandler.completeJobOnWorker(self._workerId)
 					# result = message['result']
 					self._resultQ.put_nowait("OK")
@@ -74,14 +74,14 @@ class JobsMsgHandler(ProtocolAnalyzer):
 					self._logger.debug("# JMS : [%s] %s "%(self._workerId, proto))
 					self._logger.info("# [TAJO] [%s] tajo query done" %(self._workerId))
 					jobType = message['jobType']
-					if jobType == 'NILM_RAW_DATA' or jobType == 'NILM_STATUS_CHECK':
+					if jobType == 'DPU_RAW_DATA' or jobType == 'DPU_STATUS_CHECK':
 						self._resourceHandler.setTajoEnableStatus(True)
 						self._resourceHandler.assignPriorityWorker()
 
 				elif proto == 'REQ_JOB_SUCCES':
 					jobType = message['jobType']
 					self._logger.debug("# JMS : [%s] %s - jobType : %s"%(self._workerId, proto, jobType))
-					if jobType == 'NILM_RAW_DATA' or jobType == 'NILM_STATUS_CHECK':
+					if jobType == 'DPU_RAW_DATA' or jobType == 'DPU_STATUS_CHECK':
 						self._logger.info("# [TAJO] [%s] data collection done" %(self._workerId))
 						self._resourceHandler.delPrevWorkerObj(self._workerObj)
 						self._resourceHandler.delCurrPriorityWorker(workerObj=self._workerObj)
@@ -91,23 +91,23 @@ class JobsMsgHandler(ProtocolAnalyzer):
 					if message.has_key('error'):
 						self._logger.error(message['error'])
 					jobMessage = message['jobMsg']
-					
+
 					self._logger.warn("# JMS : [%s] Job failed, so it was roll back and going to retry running job by other worker." %(self._workerId))
 					self._logger.debug("# JMS : [%s] %s - analysisType : %s"%(self._workerId, proto, jobMessage['params']['analysisType']))
 
 					analysisType = None
 					if jobMessage['params'].has_key('analysisType'):
 						analysisType = jobMessage['params']['analysisType']
-					
+
 					if jobMessage['retry'] <= self._maxJobRetryCount:
 						jobMessage['retry'] += 1
 						jobProto = jobMessage['proto']
-						
-						if jobProto == 'REQ_NILM_STATUS_CHECK' or jobProto == 'REQ_GEN_NILM_RAW_DATA':
+
+						if jobProto == 'REQ_DPU_STATUS_CHECK' or jobProto == 'REQ_GEN_DPU_RAW_DATA':
 							self._resourceHandler.addPriorityJob((1,jobMessage))
-						elif jobProto == 'REQ_NILM_LEARN_SCHEDULE':
+						elif jobProto == 'REQ_DPU_LEARN_SCHEDULE':
 							self._resourceHandler.addPrivateJob((1,jobMessage))
-						elif jobProto == 'REQ_NILM_DATA':
+						elif jobProto == 'REQ_DPU_DATA':
 							if analysisType == 'usage':
 								self._resourceHandler.addPrivateJob((1,jobMessage))
 							elif analysisType == 'meta':

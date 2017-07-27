@@ -59,17 +59,12 @@ def getProcessInfo(confName = 'PROCESS_MANAGER'):
 			process_config[element_name] = conf.get(confName, element_name)
 	return process_config
 
-def getDataStoreInfo(confName = 'DATA_STORE'):
-	conf = getConfig()
-	dataPath = conf.get(confName, 'path')
-	return dataPath
-
 def getDebugDataStoreInfo(confName = 'DEBUG_DATA_STORE'):
 	conf = getConfig()
 	debugDataPath = conf.get(confName, 'path')
 	return debugDataPath
 
-def getNilmInfo(confName = 'NILM_INFO'):
+def getDpuInfo(confName = 'DPU_INFO'):
 	process_config = {}
 	conf = getConfig()
 	process_config['groupNames'] = conf.get(confName, 'group_names').split(',')
@@ -77,38 +72,38 @@ def getNilmInfo(confName = 'NILM_INFO'):
 	process_config['metaUpdatePeriod'] = int(conf.get(confName, 'meta_update_period'))
 	return process_config
 
-def getNilmGroupNames(confName = 'NILM_INFO'):
+def getDpuGroupNames(confName = 'DPU_INFO'):
 	conf = getConfig()
 	groupNames = conf.get(confName, 'group_names').split(',')
 	return groupNames
 
-def getNilmGroupIds(confName = 'NILM_INFO'):
+def getDpuGroupIds(confName = 'DPU_INFO'):
 	conf = getConfig()
 	groupIds = conf.get(confName, 'group_ids').replace(' ','').split(',')
 	groupIds = [int(groupId) for groupId in groupIds]
 	return groupIds
 
-def getNilmMetaSearchPeriod(confName = 'NILM_INFO'):
+def getDpuMetaSearchPeriod(confName = 'DPU_INFO'):
 	conf = getConfig()
 	metaHistoryPeriod = (int(conf.get(confName, 'meta_history_period'))) * ONE_DAY
 	return metaHistoryPeriod
 
-def getNilmMetaUpdatePeriod(confName = 'NILM_INFO'):
+def getDpuMetaUpdatePeriod(confName = 'DPU_INFO'):
 	conf = getConfig()
 	metaUpdateTS = (int(conf.get(confName, 'meta_update_period'))) * ONE_DAY
 	return metaUpdateTS
 
-def getNilmMetaUpdateDailyPeriod(confName = 'NILM_INFO'):
+def getDpuMetaUpdateDailyPeriod(confName = 'DPU_INFO'):
 	conf = getConfig()
 	metaUpdateTS = (int(conf.get(confName, 'meta_update_period')))
 	return metaUpdateTS
 
-def getAllowedMinPeriod(confName = 'NILM_INFO'):
+def getAllowedMinPeriod(confName = 'DPU_INFO'):
 	conf = getConfig()
 	minQuantity = int(conf.get(confName, 'min_quantity'))
 	return minQuantity
 
-def getMaxLearningJob(confName = 'NILM_INFO'):
+def getMaxLearningJob(confName = 'DPU_INFO'):
 	conf = getConfig()
 	maxLearningJob = int(conf.get(confName, 'max_learing_job'))
 	return maxLearningJob

@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from common.conf_system import getNilmMetaSearchPeriod
+from common.conf_system import getDpuMetaSearchPeriod
 import traceback
 import datetime
 import calendar
@@ -132,12 +132,12 @@ def convertTS2DailyTimestampList(startTS, endTS):
 		startTS += ONE_DAY
 	return dailyDateList
 
-def isNilmUpdatale(updateTS, nilmMetaSearchPeriod = None):
-	if not nilmMetaSearchPeriod:
-		nilmMetaSearchPeriod = getNilmMetaSearchPeriod()
+def isDpuUpdatale(updateTS, dpuMetaSearchPeriod = None):
+	if not dpuMetaSearchPeriod:
+		dpuMetaSearchPeriod = getDpuMetaSearchPeriod()
 
 	currentTS = getUtcNowTS()
-	if (currentTS - updateTS) >= nilmMetaSearchPeriod:
+	if (currentTS - updateTS) >= dpuMetaSearchPeriod:
 		return True
 	return False
 

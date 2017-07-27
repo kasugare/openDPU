@@ -17,7 +17,6 @@ class DataSender:
 		self._lock = Lock()
 
 	def sendMsg(self, protoMessage):
-		# self._logger.debug(">> [%s] send : %s" %(self._workerId.ljust(16), str(protoMessage)))
 		if not protoMessage['proto'] == 'RES_HB' and not protoMessage['proto'] == 'REQ_HB':
 			self._logger.debug(">> [%s] send : %s" %(self._workerId.ljust(16), str(protoMessage)))
 		try:
@@ -152,7 +151,7 @@ class DataReceiver:
 					if lengthIndex:
 						if len(bufferedData[:lengthIndex].split('#')) >= 2:
 							dataLength = int(bufferedData[:lengthIndex].split('#')[1])
-							bufferedData = bufferedData[lengthIndex+2:] 
+							bufferedData = bufferedData[lengthIndex+2:]
 							receivedByte = len(bufferedData)
 							dataBuffer.append(bufferedData)
 

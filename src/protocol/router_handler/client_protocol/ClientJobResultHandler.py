@@ -2,9 +2,7 @@
 # -*- coding: utf-8 -*-
 
 from common.conf_version import getVersionInfo
-from common.conf_nilm_groups import getNilmGroupTable, getNilmGroupInfoForClient
 from common.util_common import cvtWorkerId as cvtClientId
-from data_store.DataServiceManager import DataServiceManager
 import copy
 import sys
 
@@ -15,6 +13,6 @@ class ClientJobResultHandler:
 		self._resourceManager = resourceManager
 		self._clintId = cvtClientId(socketObj)
 
-	def doNilmMlResultJob(self, message):
+	def doDpuMlResultJob(self, message):
 		self._sendMessage(genResOK())
 		self._resourceManager.delClientObject(clientId)

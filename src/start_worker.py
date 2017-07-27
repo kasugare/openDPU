@@ -1,2 +1,2 @@
 ~/processKill.sh
-python NilmCluster.py worker
+python DpuCluster.py worker

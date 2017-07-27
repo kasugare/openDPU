@@ -4,7 +4,7 @@
 from protocol.message_pool.MessageGenerator import genResHB, genReqConnClose, genResOK
 from common.conf_collector import getDataCollector
 from common.conf_network import getHostInfo
-from nilm_master.collection_manager.CollectionMessageGenerator import CollectionMessageGenerator
+from dpu_master.collection_manager.CollectionMessageGenerator import CollectionMessageGenerator
 from tcp_modules.NetworkHandler import DataReceiver, DataSender
 from ProtocolAnalyzer import ProtocolAnalyzer
 from socket import socket, AF_INET, SOCK_STREAM
@@ -21,11 +21,11 @@ class CollectorsMsgHandler(ProtocolAnalyzer):
 		proto = self.analyzeMessage(message)
 
 		try:
-			if proto == 'REQ_NILM':
+			if proto == 'REQ_DPU':
 				protoMsgs = self._messageGenerator.genCollectionMessages(message['params'])
 				for protoMsg in protoMsgs:
 					self._connCollectorServer(protoMsg)
-			elif proto == 'RES_NILM_DATA':
+			elif proto == 'RES_DPU_DATA':
 				self._connJobManagerServer(message)
 		except Exception, e:
 			self._logger.exception(e)
@@ -64,7 +64,7 @@ class CollectorsMsgHandler(ProtocolAnalyzer):
 				elif protocol == 'REQ_JC':
 					sender.sendMsg(genReqConnClose())
 					break
-				elif protocol == 'RES_NILM_DATA':
+				elif protocol == 'RES_DPU_DATA':
 					self.routeProtocol(recvMessage)
 				elif protocol == 'REQ_PROGS':
 					self._logger.info(str(recvMessage['message']))

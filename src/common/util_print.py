@@ -18,16 +18,16 @@ def printMap(logger, statusMap):
 	for key in statusMap.keys():
 		try:
 			sid = statusMap[key]['sid']
-			nilmFreq = statusMap[key]['nilmFreq']
+			dpuFreq = statusMap[key]['dpuFreq']
 			deviceCh = statusMap[key]['deviceCh']
 			deviceStatus = statusMap[key]['deviceStatus']
-			nilmStatus = statusMap[key]['nilmStatus']
+			dpuStatus = statusMap[key]['dpuStatus']
 			hasMeta = statusMap[key]['hasMeta']
 			regTS = statusMap[key]['regTS']
 			updateTS = statusMap[key]['updateTS']
 			# DATE = convertTS2Date(regTS * 1000)
-			logger.debug('sid: %d, freq: %d, ch: %d, devStat: %s, nilmStat: %s, meta: %d, regTS: %d (%s), upTS: %d (%s)' %(sid, nilmFreq, deviceCh, deviceStatus, nilmStatus, hasMeta, regTS, htime(regTS*1000), updateTS, htime(updateTS*1000)))
-			# logger.debug('%d - REG_DATE : %d, DATE : %s, DEVICE : %s, NILM : %s, META : %d' %(key, regTS, DATE, deviceStatus, nilmStatus, hasMeta))
+			logger.debug('sid: %d, freq: %d, ch: %d, devStat: %s, dpuStat: %s, meta: %d, regTS: %d (%s), upTS: %d (%s)' %(sid, dpuFreq, deviceCh, deviceStatus, dpuStatus, hasMeta, regTS, htime(regTS*1000), updateTS, htime(updateTS*1000)))
+			# logger.debug('%d - REG_DATE : %d, DATE : %s, DEVICE : %s, DPU : %s, META : %d' %(key, regTS, DATE, deviceStatus, dpuStatus, hasMeta))
 		except Exception, e:
 			logger.error(statusMap[key])
 			logger.exception(e)
@@ -42,54 +42,54 @@ def printStatusMap(statusMap):
 	print "< ACTIVATED DEVICE INFO >"
 	for key in statusMap.keys():
 		deviceStatus = statusMap[key]['deviceStatus']
-		nilmStatus = statusMap[key]['nilmStatus']
+		dpuStatus = statusMap[key]['dpuStatus']
 		hasMeta = statusMap[key]['hasMeta']
 		regTS = statusMap[key]['regTS'] * 1000
 		DATE = convertTS2Date(regTS)
 		if deviceStatus == 'active':
-			print '%d - REG_DATE : %d, DATE : %s, DEVICE : %s, NILM : %s, META : %d' %(key, regTS, DATE, deviceStatus, nilmStatus, hasMeta)
+			print '%d - REG_DATE : %d, DATE : %s, DEVICE : %s, DPU : %s, META : %d' %(key, regTS, DATE, deviceStatus, dpuStatus, hasMeta)
 		count += 1
 	print " count : %d" %(count)
 	print "-" * 100
 
-	print "< ALLOWED NILM STATUS INFO >"
+	print "< ALLOWED DPU STATUS INFO >"
 	count = 0
 	for key in statusMap.keys():
 		deviceStatus = statusMap[key]['deviceStatus']
-		nilmStatus = statusMap[key]['nilmStatus']
+		dpuStatus = statusMap[key]['dpuStatus']
 		hasMeta = statusMap[key]['hasMeta']
 		regTS = statusMap[key]['regTS'] * 1000
 		DATE = convertTS2Date(regTS)
-		if nilmStatus == 'active':
-			print '%d - REG_DATE : %d, DATE : %s, DEVICE : %s, NILM : %s, META : %d' %(key, regTS, DATE, deviceStatus, nilmStatus, hasMeta)
+		if dpuStatus == 'active':
+			print '%d - REG_DATE : %d, DATE : %s, DEVICE : %s, DPU : %s, META : %d' %(key, regTS, DATE, deviceStatus, dpuStatus, hasMeta)
 		count += 1
 	print " count : %d" %(count)
 	print "-" * 100
 
-	print "< ACTIVATED DEVICE, ALLOWED NILM INFO >"
+	print "< ACTIVATED DEVICE, ALLOWED DPU INFO >"
 	count = 0
 	for key in statusMap.keys():
 		deviceStatus = statusMap[key]['deviceStatus']
-		nilmStatus = statusMap[key]['nilmStatus']
+		dpuStatus = statusMap[key]['dpuStatus']
 		hasMeta = statusMap[key]['hasMeta']
 		regTS = statusMap[key]['regTS'] * 1000
 		DATE = convertTS2Date(regTS)
-		if deviceStatus == 'active' and nilmStatus == 'active':
-			print '%d - REG_DATE : %d, DATE : %s, DEVICE : %s, NILM : %s, META : %d' %(key, regTS, DATE, deviceStatus, nilmStatus, hasMeta)
+		if deviceStatus == 'active' and dpuStatus == 'active':
+			print '%d - REG_DATE : %d, DATE : %s, DEVICE : %s, DPU : %s, META : %d' %(key, regTS, DATE, deviceStatus, dpuStatus, hasMeta)
 			count += 1
 	print " count : %d" %(count)
 	print "-" * 100
 
-	print "< ACTIVATED NILM STATUS INFO >"
+	print "< ACTIVATED DPU STATUS INFO >"
 	count = 0
 	for key in statusMap.keys():
 		deviceStatus = statusMap[key]['deviceStatus']
-		nilmStatus = statusMap[key]['nilmStatus']
+		dpuStatus = statusMap[key]['dpuStatus']
 		hasMeta = statusMap[key]['hasMeta']
 		regTS = statusMap[key]['regTS'] * 1000
 		DATE = convertTS2Date(regTS)
-		if deviceStatus == 'active' and nilmStatus == 'active' and hasMeta == 1:
-			print '%d - REG_DATE : %d, DATE : %s, DEVICE : %s, NILM : %s, META : %d' %(key, regTS, DATE, deviceStatus, nilmStatus, hasMeta)
+		if deviceStatus == 'active' and dpuStatus == 'active' and hasMeta == 1:
+			print '%d - REG_DATE : %d, DATE : %s, DEVICE : %s, DPU : %s, META : %d' %(key, regTS, DATE, deviceStatus, dpuStatus, hasMeta)
 		count += 1
 	print " count : %d" %(count)
 	count = 0

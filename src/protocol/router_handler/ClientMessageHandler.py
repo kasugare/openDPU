@@ -5,7 +5,6 @@ from tcp_modules.NetworkHandler import DataSender
 from protocol.message_pool.MessageGenerator import genReqJobCompleted, genResOK, genReqError
 from protocol.router_handler.client_protocol.ClientRequestHandler import ClientRequestHandler
 from protocol.router_handler.client_protocol.ClientJobResultHandler import ClientJobResultHandler
-from nilm_master.job_container.nilm_output_checker.NilmOutputChecker import NilmOutputChecker
 
 class ClientMessageHandler:
 	def __init__(self, logger, socketObj, resourceManager, jobQ):
@@ -17,16 +16,16 @@ class ClientMessageHandler:
 	def routeRequestJob(self, message):
 		try:
 			protocol = message['proto']
-			if protocol == 'REQ_NILM_JOB':
-				self._clientRequestHandler.doNilmJobOption(message)
+			if protocol == 'REQ_DPU_JOB':
+				self._clientRequestHandler.doDpuJobOption(message)
 			elif protocol == 'REQ_VERSION':
 				self._clientRequestHandler.checkClusterVersion(message)
 			elif protocol == 'REQ_WORKERS_RESOURCES':
 				self._clientRequestHandler.getWorkerResources(message)
 			elif protocol == 'REQ_GROUP_INFO':
-				self._clientRequestHandler.getNilmGroupInfo(message)
+				self._clientRequestHandler.getDpuGroupInfo(message)
 			elif protocol == 'REQ_OUTPUT_CHECK':
-				self._clientRequestHandler.checkNilmPredictOutput(message)
+				self._clientRequestHandler.checkDpuPredictOutput(message)
 			elif protocol == 'REQ_HB':
 				pass
 			else:
@@ -38,12 +37,12 @@ class ClientMessageHandler:
 	def routeResponsJob(self, message):
 		try:
 			protocol == message['proto']
-			if protocol == 'RES_NILM_ML_JOB':
-				self._clientJobResultHandler.doNilmMlResultJob(message)
+			if protocol == 'RES_DPU_ML_JOB':
+				self._clientJobResultHandler.doDpuMlResultJob(message)
 		except Exception, e:
 			self._logger.exception(e)
 			self._sendMessage(genReqError(e))
-			
+
 
 	def _sendMessage(self, message):
 		try:
