@@ -54,7 +54,7 @@ target/
 
 # ETC
 *.swp
-data/
+#data/
 .idea/
 venv/
 .venv/

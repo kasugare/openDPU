@@ -3,7 +3,7 @@
 
 from common_utility import getServerInfo, getMailInfo, hdate
 from UserOrderSheet import UserOptionParser
-from MessageGenerator import genOrderMessage, genVersionCheck, genNilmGroupInfo, genReqWorkersResources, genReqOutputCheck
+from MessageGenerator import genOrderMessage, genVersionCheck, genReqWorkersResources
 from socket import socket, AF_INET, SOCK_STREAM
 from Logger import Logger
 import traceback
@@ -28,12 +28,8 @@ class DpuClient:
 		self._connServer()
 		if self._orderSheet.get('version'):
 			message = genVersionCheck(self._orderSheet)
-		elif self._orderSheet.get('showGroups'):
-			message = genNilmGroupInfo(self._orderSheet)
 		elif self._orderSheet['workers']:
 			message = genReqWorkersResources(self._orderSheet)
-		elif self._orderSheet['outputCheck']:
-			message = genReqOutputCheck(self._orderSheet)
 		else:
 			message = genOrderMessage(self._orderSheet)
 
@@ -59,30 +55,13 @@ class DpuClient:
 				versionInfo = recvMessage['versionInfo']
 				if versionInfo.has_key('version'):
 					version = versionInfo['version']
-					print "# nilm cluster version : %s" %(version)
+					print "# openDpu cluster version : %s" %(version)
 				if versionInfo.has_key('update_date'):
 					updateDate = versionInfo['update_date']
 					print " - updated date : %s" %(updateDate)
 				if versionInfo.has_key('describe'):
 					describe = versionInfo['describe']
 					print " - describe : %s" %(describe)
-				break
-			elif proto == 'RES_GROUP_INFO':
-				nilmGroupInfo = recvMessage['nilmGroupInfo']
-				if not nilmGroupInfo:
-					print "# Nilm Groups are not registered"
-					break
-
-				print "# Nilm Group Info"
-				print "-" * 31
-				print "%s%s : %s" %(' '*8, 'Group Name'.ljust(15), 'ID'.center(2))
-				print "-" * 31
-				gids = ['{0:0>3}'.format(gid) for gid in nilmGroupInfo.keys()]
-				gids.sort()
-				for gid in gids:
-					groupName = str(nilmGroupInfo[int(gid)])
-					print " - %s : %s" %(groupName.ljust(20), str(int(gid)).rjust(2))
-				print "-" * 31
 				break
 			elif proto == 'RES_WORKERS_RESOURCES':
 				workerResources = recvMessage['resoures']

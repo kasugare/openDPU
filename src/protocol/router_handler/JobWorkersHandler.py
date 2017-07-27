@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 from common.util_logger import Logger
-from protocol.message_pool.MessageGenerator import genResHB, genReqResourceStat, genReqJobCompelted, genReqJobFail, genStubDpuMlJobSuccess, genStubDpuMlJobFail
+from protocol.message_pool.MessageGenerator import genResHB, genReqResourceStat, genReqJobCompelted, genReqJobFail
 from protocol.message_pool.MessageGenerator import genReqTajoEnable
 from tcp_modules.NetworkHandler import DataSender
 from dpu_worker.job_container.data_etl.DataEtlManager import DataEtlManager

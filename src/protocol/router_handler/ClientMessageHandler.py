@@ -17,15 +17,11 @@ class ClientMessageHandler:
 		try:
 			protocol = message['proto']
 			if protocol == 'REQ_DPU_JOB':
-				self._clientRequestHandler.doDpuJobOption(message)
+				self._clientRequestHandler.checkDpuJob(message)
 			elif protocol == 'REQ_VERSION':
 				self._clientRequestHandler.checkClusterVersion(message)
 			elif protocol == 'REQ_WORKERS_RESOURCES':
 				self._clientRequestHandler.getWorkerResources(message)
-			elif protocol == 'REQ_GROUP_INFO':
-				self._clientRequestHandler.getDpuGroupInfo(message)
-			elif protocol == 'REQ_OUTPUT_CHECK':
-				self._clientRequestHandler.checkDpuPredictOutput(message)
 			elif protocol == 'REQ_HB':
 				pass
 			else:
@@ -33,16 +29,6 @@ class ClientMessageHandler:
 		except Exception, e:
 			self._logger.exception(e)
 			self._sendMessage(genReqError(e))
-
-	def routeResponsJob(self, message):
-		try:
-			protocol == message['proto']
-			if protocol == 'RES_DPU_ML_JOB':
-				self._clientJobResultHandler.doDpuMlResultJob(message)
-		except Exception, e:
-			self._logger.exception(e)
-			self._sendMessage(genReqError(e))
-
 
 	def _sendMessage(self, message):
 		try:

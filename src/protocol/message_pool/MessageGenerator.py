@@ -38,22 +38,6 @@ def genResVersion(versionInfo):
 	}
 	return message
 
-# Dpu Groups Info
-def genResDpuGroupInfo(dpuGroupInfo):
-	message = {
-		'proto': 'RES_GROUP_INFO',
-		'dpuGroupInfo': dpuGroupInfo
-	}
-	return message
-
-# Dpu Output Check Info
-def genResDpuOutputCheckInfo(checkedOutputResultSet):
-	message = {
-		'proto': 'RES_OUTPUT_CHECK',
-		'outputCheckInfo': checkedOutputResultSet
-	}
-	return message
-
 # Job Complete
 def genReqJobCompleted():
 	message = {'proto': 'REQ_JC'}
@@ -107,6 +91,25 @@ def genResStatus(processRate, totalMem, usedMem, jobs):
 		}
 	}
 	return message
+
+# Job Run
+def genReqJobRun(params):
+	message = {
+		'proto': 'REQ_DPU_JOB',
+		'params': params
+	}
+	return message
+
+def getReqEtlJob(jobType, params={}):
+	message = {
+		'proto': 'REQ_ETL_JOB',
+		'jobType': jobType,
+		'params': params,
+		'retry': 0,
+		'processType': None
+	}
+	return message
+
 
 # Data Protocol
 def genReqDpuRawData(params):
@@ -171,12 +174,6 @@ def genResDpuData(jobType, offerType, result, dataSet='SINGLE'):
 	}
 	return message
 
-def genResTajoAnalysisDone(jobName):
-	message = {
-		'proto': 'RES_TAJO_DONE',
-		'jobName': jobName
-	}
-
 # Resource Status
 def genReqResourceStat(totalCpu, publicCpu):
 	message = {
@@ -218,33 +215,5 @@ def genReqJobFail(jobId, availCpu, message, error='', processType=None):
 		'jobMsg': message,
 		'error': error,
 		'processType': processType
-	}
-	return message
-
-### TAJO ###
-#'''result = {'meta':{1:{sid:hdfs_path,...}, 15:{sid:hdfs_path,...}}, 'usage':{1:{sid:hdfs_path,..}, 15:{sid:hdfs_path,...}}}'''
-def genResTajoData(jobType, offerType, params, dataSet='SINGLE'):
-	message = {
-		'proto': 'RES_DPU_DATA',
-		'jobType': jobType,
-		'offer': offerType,
-		'retry': 0,
-		'params': params
-	}
-	return message
-
-def genStubDpuMlJobSuccess(stubId, result):
-	message = {
-		'proto': 'RES_STUB_DPU_ML_SUCCESS',
-		'stubId': stubId,
-		'result': result
-	}
-	return message
-
-def genStubDpuMlJobFail(stubId, result):
-	message = {
-		'proto': 'RES_STUB_DPU_ML_FAIL',
-		'stubId': stubId,
-		'result': result
 	}
 	return message

@@ -19,11 +19,12 @@ class JobRoutingHandler:
 	def doProcess(self):
 		while True:
 			message = pickle.loads(self._clientRequestJobQueue.get())
-			self._logger.debug("# Dpu tajo gateway jobs")
+			self._logger.debug("# Job task assign")
+			print message
 
 			try:
 				proto = message['proto']
-				if proto == 'REQ_DPU_RAW_DATA':
+				if proto == 'REQ_DPU_JOB':
 					reqMsg = self._messageGenerator.genCollectionMessages(message['params'])
 					self._genDpuRawDataRequestSet(reqMsg)
 
@@ -33,7 +34,7 @@ class JobRoutingHandler:
 
 	def _genDpuRawDataRequestSet(self, reqMsgs):
 		primeryJobTypes = ['statusCheck']
-		secondaryJobTypes = ['usage']
+		secondaryJobTypes = ['usage', 'ETL']
 		tertiaryJobTypes = ['candidate']
 		quaternaryJobTypes = ['learnSchedule']
 		quinaryJobTypes = ['metaSearch', 'metaUpdate']
@@ -46,65 +47,21 @@ class JobRoutingHandler:
 
 		for orderedJob in reqMsgs:
 			params = orderedJob['params']
-			analysisType = params['analysisType']
+			jobType = orderedJob['jobType']
 
-			if analysisType in primeryJobTypes:
+			if jobType in primeryJobTypes:
 				primeryJobs.append(orderedJob)
-			elif analysisType in secondaryJobTypes:
-				siteMap = params['target']
-				sids = siteMap.keys()
-				splitSize = getBulkSize()
-				indexCount = 0
-				startIndex = 0
-				endIndex = splitSize
-				splitedSids = []
 
-				while True:
-					indexCount += len(sids[startIndex:endIndex])
-					splitedSids.append(sids[startIndex:endIndex])
-					startIndex = endIndex
-					endIndex += splitSize
-					if len(sids) <= indexCount: break
+			elif jobType in secondaryJobTypes:
+				secondaryJobs.append(orderedJob)
 
-				usageParamMap = {}
-				for targetSids in splitedSids:
-					targetSids = list(set(targetSids))
-					usageParamMap = copy.deepcopy(orderedJob)
-					usageParamMap['params']['target'] = {}
-					for sid in targetSids:
-						did = siteMap[sid]
-						usageParamMap['params']['target'][sid] = did
-					if usageParamMap['params']['target']:
-						secondaryJobs.append(usageParamMap)
-			elif analysisType in tertiaryJobTypes:
-				siteMap = params['target']
-				sids = siteMap.keys()
-				splitSize = getBulkSize()
-				indexCount = 0
-				startIndex = 0
-				endIndex = splitSize
-				splitedSids = []
+			elif jobType in tertiaryJobTypes:
+				tertiaryJobs.append(orderedJob)
 
-				while True:
-					indexCount += len(sids[startIndex:endIndex])
-					splitedSids.append(sids[startIndex:endIndex])
-					startIndex = endIndex
-					endIndex += splitSize
-					if len(sids) <= indexCount: break
-
-				usageParamMap = {}
-				for targetSids in splitedSids:
-					targetSids = list(set(targetSids))
-					usageParamMap = copy.deepcopy(orderedJob)
-					usageParamMap['params']['target'] = {}
-					for sid in targetSids:
-						did = siteMap[sid]
-						usageParamMap['params']['target'][sid] = did
-					if usageParamMap['params']['target']:
-						tertiaryJobs.append(usageParamMap)
-			elif analysisType in quaternaryJobTypes:
+			elif jobType in quaternaryJobTypes:
 				quaternaryJobs.append(orderedJob)
-			elif analysisType in quinaryJobTypes:
+
+			elif jobType in quinaryJobTypes:
 				quinaryJobs.append(orderedJob)
 
 		def orderJobs(jobList, priority=1, processType='publicCpu'):
@@ -118,10 +75,11 @@ class JobRoutingHandler:
 				jobPool = self._resourceHandler.getPrivateJobPool()
 
 			for orderedJob in jobList:
+				print orderedJob
 				jobPool.put_nowait((priority, orderedJob))
 
 		if primeryJobs: orderJobs(primeryJobs, priority=1, processType='priorityCpu')
-		if secondaryJobs: orderJobs(secondaryJobs, priority=2, processType='priorityCpu')
+		if secondaryJobs: orderJobs(secondaryJobs, priority=2, processType='private')
 		if tertiaryJobs: orderJobs(tertiaryJobs, priority=3, processType='priorityCpu')
 		if quaternaryJobs: orderJobs(quaternaryJobs, priority=1, processType='publicCpu')
 		if quinaryJobs: orderJobs(quinaryJobs, priority=4, processType='priorityCpu')

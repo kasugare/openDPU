@@ -3,17 +3,12 @@
 
 def genOrderMessage(orderSheet):
 	message = {
-		'proto': 'REQ_NILM_JOB',
+		'proto': 'REQ_DPU_JOB',
 		'orderSheet': {
-			'remove': orderSheet['remove'],
-			'groupNames': orderSheet['groupNames'],
-			'sids': orderSheet['sids'],
-			'startTS': orderSheet['startTS'],
-			'endTS': orderSheet['endTS'],
-			'jobs': orderSheet['job'],
-			'forced': orderSheet['userInputPeriod'],
+			'jobs': orderSheet['jobs'],
+			'storage': orderSheet['storage'],
+			'paths': orderSheet['paths'],
 			'version': orderSheet['version'],
-			'rExtOpt': orderSheet['rExtOpt'],
 			'debugMode': orderSheet['debugMode']
 			}
 		}
@@ -28,33 +23,12 @@ def genVersionCheck(orderSheet):
 		}
 	return message
 
-def genNilmGroupInfo(orderSheet):
-	message = {
-		'proto': 'REQ_GROUP_INFO',
-		'orderSheet': {
-			'nilmGroupInfo': orderSheet['showGroups']
-			}
-		}
-	return message
-
 def genReqWorkersResources(orderSheet):
 	message = {
 		'proto': 'REQ_WORKERS_RESOURCES',
 		'orderSheet': {
 			'workers': [orderSheet['workers']]
 		}
-	}
-	return message
-
-def genReqOutputCheck(orderSheet):
-	message = {
-		'proto': 'REQ_OUTPUT_CHECK',
-		'orderSheet': {
-			'groupNames': orderSheet['groupNames'],
-			'sids': orderSheet['sids'],
-			'startTS': orderSheet['startTS'],
-			'endTS': orderSheet['endTS']
-			}
 	}
 	return message
 
