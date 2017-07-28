@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 from protocol.message_pool.MessageGenerator import getReqEtlJob
+import time
 import os
 
 class CollectionMessageGenerator:
@@ -14,6 +15,7 @@ class CollectionMessageGenerator:
 		paths = userParams['paths']
 		filePathList = []
 		protoMsgs = []
+		jobId = '%s_%d' %(jobs, time.time() * 1000000)
 
 		for targetPath in paths:
 			if storageType == 'FILE':
@@ -27,15 +29,15 @@ class CollectionMessageGenerator:
 				pass
 		filePathList = list(set(filePathList))
 
-		for filePath in filePathList:
+		for index in range(len(filePathList)):
 			params = {
 				'storageType': storageType,
-				'filePath': filePath
+				'filePath': filePathList[index]
 			}
-			protoMsgs.append(getReqEtlJob(jobType=jobs, params=params))
+			protoMsgs.append(getReqEtlJob(jobType=jobs, jobId=jobId, taskId=index, params=params))
 
 		self._printMsgParams(protoMsgs)
-		return protoMsgs
+		return jobId, protoMsgs
 
 	def _getFilePathInDir(self, dirPath):
 		filePathList = []

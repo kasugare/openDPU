@@ -100,10 +100,12 @@ def genReqJobRun(params):
 	}
 	return message
 
-def getReqEtlJob(jobType, params={}):
+def getReqEtlJob(jobType, jobId, taskId, params={}):
 	message = {
 		'proto': 'REQ_ETL_JOB',
 		'jobType': jobType,
+		'jobId': jobId,
+		'taskId': taskId,
 		'params': params,
 		'retry': 0,
 		'processType': None
@@ -198,19 +200,23 @@ def genReqTajoEnable(jobType):
 	}
 	return message
 
-def genReqJobCompelted(jobId, availCpu, jobType = None, result=None, processType=None):
+def genReqJobCompelted(jobId, availCpu, taskId=None, jobType=None, result=None, processType=None):
 	message = {
 		'proto': 'REQ_JOB_SUCCES',
 		'availCpu': availCpu,
-		'jobType' : jobType,
+		'jobType': jobType,
+		'jobId': jobId,
+		'taskId': taskId,
 		'result': result,
 		'processType': processType
 	}
 	return message
 
-def genReqJobFail(jobId, availCpu, message, error='', processType=None):
+def genReqJobFail(jobId, availCpu, message, taskId=None, error='', processType=None):
 	message = {
 		'proto': 'REQ_JOB_FAIL',
+		'jobId': jobId,
+		'taskId': taskId,
 		'availCpu': availCpu,
 		'jobMsg': message,
 		'error': error,

@@ -25,10 +25,12 @@ class MasterResourcePool:
 
 		self._currPriorityWorker = None
 		self._prevWorkerObjs = {}
-		
+
 		self._tajoSearchable = True
 		self._isTajoEnabled = True
-		
+
+		self._jobDAG = {}
+
 
 	def _resetPrivateCpu(self, resetCore):
 		self._privateCpu = resetCore

@@ -18,7 +18,7 @@ import os
 class JobWorkersHandler(ProtocolAnalyzer):
 	def __init__(self, logger, socketObj, resourceManager, outputQ, jobRequestQ, stubResultQ):
 		ProtocolAnalyzer.__init__(self, logger, socketObj)
-		self.__initLogger__()
+		self.__initLogger()
 		self._logger = logger
 		self._resourceManager = resourceManager
 		self._sendMessageQ = multiprocessing.Queue()
@@ -33,7 +33,7 @@ class JobWorkersHandler(ProtocolAnalyzer):
 		for pid in self._MlSubprocessTable.keys():
 			os.kill(pid, signal.SIGTERM)
 
-	def __initLogger__(self):
+	def __initLogger(self):
 		self._statusLogger = Logger('DPU_STATUS').getLogger()
 		self._dataEtlLogger= Logger('DATA_ETL').getLogger()
 
@@ -73,40 +73,39 @@ class JobWorkersHandler(ProtocolAnalyzer):
 				continue
 
 			if message.has_key('jobType'):
-				jobType = (message['jobType']).upper()
-				jobId = '%s_%d' %(jobType, time.time())
-			else:
-				jobType = None
-				jobId = None
-
+				jobType = message['jobType']
+			if message.has_key('jobId'):
+				jobId = message['jobId']
+			if message.has_key('taskId'):
+				taskId = message['taskId']
 			if message.has_key('processType'):
 				processType = message['processType']
 
 			if proto == 'REQ_HB':
 				self._logger.debug('- available cpu : %d' %self._resourceManager.getAvailCpu())
 				self._sendMessageQ.put_nowait(genResHB())
-
-			elif proto == 'REQ_GEN_DPU_RAW_DATA':
+			elif proto == 'REQ_ETL_JOB':
 				self._logger.debug('- crete job process, job type : %s' %jobType)
-				jobThread = Thread(target=self._runDpuDataGenerator, args=(processType, jobId, jobType, message))
+				jobThread = Thread(target=self._runDpuDataGenerator, args=(processType, jobId, jobType, taskId, message))
 
 			if jobThread:
 				jobThread.setDaemon(1)
 				jobThread.start()
 
-
-	def _runDpuDataGenerator(self, processType, jobId, jobType, message):
+	def _runDpuDataGenerator(self, processType, jobId, jobType, taskId, message):
 		self._resourceManager.assignCpuByProcessType(processType)
 		try:
-			dataEtlManager = DataEtlManager(self._dataEtlLogger)
-			dataEtlManager.doProcess()
+			params = message['params']
+			dataEtlManager = DataEtlManager(self._dataEtlLogger, jobId)
+			result = dataEtlManager.doProcess(**params)
 
 			self._resourceManager.returnCpuByProcessType(processType)
-			sendMessage = genReqJobCompelted(jobId, availCpu=self._resourceManager.getAvailCpu(), jobType=jobType, processType=processType)
+			sendMessage = genReqJobCompelted(jobId, taskId=taskId, availCpu=self._resourceManager.getAvailCpu(), jobType=jobType, processType=processType, result=result)
 			self._sendMessageQ.put_nowait(sendMessage)
 		except Exception, e:
 			self._resourceManager.returnCpuByProcessType(processType)
-			sendMessage = genReqJobFail(jobId, availCpu=self._resourceManager.getAvailCpu(), message=message, error=str(e), processType=processType)
+			sendMessage = genReqJobFail(jobId, taskId=taskId, availCpu=self._resourceManager.getAvailCpu(), message=message, error=str(e), processType=processType)
 			self._sendMessageQ.put_nowait(sendMessage)
 			self._logger.error("# Job task be failed.")
 			self._logger.exception(e)
+

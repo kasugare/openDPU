@@ -25,14 +25,14 @@ class JobRoutingHandler:
 			try:
 				proto = message['proto']
 				if proto == 'REQ_DPU_JOB':
-					reqMsg = self._messageGenerator.genCollectionMessages(message['params'])
-					self._genDpuRawDataRequestSet(reqMsg)
+					jobId, reqMsgs = self._messageGenerator.genCollectionMessages(message['params'])
+					self._genDpuRawDataRequestSet(jobId, reqMsgs)
 
 			except Exception, e:
 				self._logger.exception(e)
 				self._logger.error("# Data collector server not ready.")
 
-	def _genDpuRawDataRequestSet(self, reqMsgs):
+	def _genDpuRawDataRequestSet(self, jobId, reqMsgs):
 		primeryJobTypes = ['statusCheck']
 		secondaryJobTypes = ['usage', 'ETL']
 		tertiaryJobTypes = ['candidate']
@@ -48,6 +48,10 @@ class JobRoutingHandler:
 		for orderedJob in reqMsgs:
 			params = orderedJob['params']
 			jobType = orderedJob['jobType']
+			jobId = orderedJob['jobId']
+			taskId = orderedJob['taskId']
+
+			self._resourceHandler.addIdleJobDAG(jobId, taskId)
 
 			if jobType in primeryJobTypes:
 				primeryJobs.append(orderedJob)
@@ -75,11 +79,10 @@ class JobRoutingHandler:
 				jobPool = self._resourceHandler.getPrivateJobPool()
 
 			for orderedJob in jobList:
-				print orderedJob
 				jobPool.put_nowait((priority, orderedJob))
 
 		if primeryJobs: orderJobs(primeryJobs, priority=1, processType='priorityCpu')
-		if secondaryJobs: orderJobs(secondaryJobs, priority=2, processType='private')
+		if secondaryJobs: orderJobs(secondaryJobs, priority=2, processType='privateCpu')
 		if tertiaryJobs: orderJobs(tertiaryJobs, priority=3, processType='priorityCpu')
 		if quaternaryJobs: orderJobs(quaternaryJobs, priority=1, processType='publicCpu')
 		if quinaryJobs: orderJobs(quinaryJobs, priority=4, processType='priorityCpu')

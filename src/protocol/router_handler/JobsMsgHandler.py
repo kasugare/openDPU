@@ -19,6 +19,7 @@ class JobsMsgHandler(ProtocolAnalyzer):
 		self._resultQ = resultQ
 		self._routerQ = Queue.Queue()
 		self._workerId = cvtWorkerId(socketObj)
+		self._resultMap = {}
 
 		self._maxJobRetryCount = getJobRetryCount()
 		self.doTerminsation = False
@@ -52,45 +53,29 @@ class JobsMsgHandler(ProtocolAnalyzer):
 					self._resourceHandler.addInitWorker(self._workerObj, totalCpu=totalCpu, publicCpu=publicCpu)
 					self._genSubProcess(jobType = 'health_check')
 
-				elif proto == 'RES_DPU_DATA' or proto == 'REQ_DPU_DATA':
-					message['proto'] = 'REQ_DPU_DATA'
-					if message.has_key('params') and message['params'].has_key('analysisType'):
-						analysisType = message['params']['analysisType']
-						self._logger.debug("# JMS : [%s] %s - analysisType : %s"%(self._workerId, proto, analysisType))
-						if analysisType == 'usage':
-							self._resourceHandler.addPrivateJob((1,message))
-						elif analysisType == 'meta' or analysisType == 'metaSearch':
-							self._resourceHandler.addPrivateJob((2,message))
-						elif analysisType == 'metaUpdate':
-						 	self._resourceHandler.addPrivateJob((3,message))
-
-				elif proto == 'RES_DPU_ML_DATA':
-					message['proto'] = 'REQ_DPU_ML_DATA'
-					self._resourceHandler.completeJobOnWorker(self._workerId)
-					# result = message['result']
-					self._resultQ.put_nowait("OK")
-
-				elif proto == 'REQ_TAJO_ENABLE':
-					self._logger.debug("# JMS : [%s] %s "%(self._workerId, proto))
-					self._logger.info("# [TAJO] [%s] tajo query done" %(self._workerId))
-					jobType = message['jobType']
-					if jobType == 'DPU_RAW_DATA' or jobType == 'DPU_STATUS_CHECK':
-						self._resourceHandler.setTajoEnableStatus(True)
-						self._resourceHandler.assignPriorityWorker()
-
 				elif proto == 'REQ_JOB_SUCCES':
 					jobType = message['jobType']
+					jobId = message['jobId']
+					taskId = message['taskId']
+					result = message['result']
 					self._logger.debug("# JMS : [%s] %s - jobType : %s"%(self._workerId, proto, jobType))
 					if jobType == 'DPU_RAW_DATA' or jobType == 'DPU_STATUS_CHECK':
 						self._logger.info("# [TAJO] [%s] data collection done" %(self._workerId))
 						self._resourceHandler.delPrevWorkerObj(self._workerObj)
 						self._resourceHandler.delCurrPriorityWorker(workerObj=self._workerObj)
 					self._resourceHandler.setRunningToWaitCpu(self._workerObj, processType=message['processType'])
+					self._resourceHandler.changeStatusToDoneJobDAG(jobId, taskId, result)
+					self._resourceHandler.getTasksOnJobDAG(jobId)
+
+					# if self._resourceHandler.checkJobTaskDone(jobId):
+					# 	self._resultReducer(jobId)
 
 				elif proto == 'REQ_JOB_FAIL':
 					if message.has_key('error'):
 						self._logger.error(message['error'])
 					jobMessage = message['jobMsg']
+					jobId = message['jobId']
+					taskId = message['taskId']
 
 					self._logger.warn("# JMS : [%s] Job failed, so it was roll back and going to retry running job by other worker." %(self._workerId))
 					self._logger.debug("# JMS : [%s] %s - analysisType : %s"%(self._workerId, proto, jobMessage['params']['analysisType']))
@@ -119,6 +104,8 @@ class JobsMsgHandler(ProtocolAnalyzer):
 					else:
 						self._logger.warn("# [%s] Exceed max retry count. job message : %s" %(self._workerId,  str(jobMessage)))
 					self._resourceHandler.setRunningToWaitCpu(self._workerObj, processType=jobMessage['processType'])
+					self._resourceHandler.changeStatusToFailJobDAG(jobId)
+
 
 			except Exception, e:
 				self._logger.exception(e)
@@ -132,3 +119,14 @@ class JobsMsgHandler(ProtocolAnalyzer):
 
 	def _runHeartBeat(self, interval = 30):
 		HealthChecker(self._logger, self).run(interval)
+
+	def _resultReducer(self, jobId):
+		taskSet = self._resourceHandler.getTasksOnJobDAG(jobId)
+		resultSet = []
+		for taskId in taskSet:
+			resultSet.append(taskSet[taskSet]['result'])
+		print resultSet
+
+
+
+

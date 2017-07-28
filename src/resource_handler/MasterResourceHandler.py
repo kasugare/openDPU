@@ -90,14 +90,14 @@ class MasterResourceHandler(MasterResourcePool):
 
 		if self._workerCpuStatus.has_key(closedWorkerId):
 			del self._workerCpuStatus[closedWorkerId]
-		
+
 		for workerId in self._workerCpuStatus.keys():
 			for processType in self._workerCpuStatus[workerId]:
 				total = self._workerCpuStatus[workerId][processType]['total']
 				running = self._workerCpuStatus[workerId][processType]['running']
 				self._workerCpuStatus[workerId][processType]['idle'] = 0
 				self._workerCpuStatus[workerId][processType]['wait'] = total - running
-		
+
 		for workerPoolType in workerPools.keys():
 			workerPool = workerPools[workerPoolType]
 			for i in range(workerPool.qsize()):
@@ -122,7 +122,7 @@ class MasterResourceHandler(MasterResourcePool):
 	def setCurrPriorityWorker(self, workerObj):
 		workerId = cvtWorkerId(workerObj)
 		self._setCurrentPriorityWorker(workerId)
-		
+
 
 	def getCurrPriorityWorker(self):
 		return self._getCurrentPriorityWorker()
@@ -253,7 +253,7 @@ class MasterResourceHandler(MasterResourcePool):
 		workerId = cvtWorkerId(workerObj)
 		if not self._workerCpuStatus.has_key(workerId):
 			self._logger.warn("wrong worker cpu status, workerId : %s" %workerId)
-		
+
 		self._workerCpuStatus[workerId][processType]['wait'] += 1
 		self._workerCpuStatus[workerId][processType]['running'] -= 1
 		self._logger.debug(" - [%s] : R -> W : %s" %(workerId.ljust(15), str(self._workerCpuStatus[workerId])))
@@ -278,3 +278,69 @@ class MasterResourceHandler(MasterResourcePool):
 		self._clearClientPool()
 
 
+	# Job DAG
+	def addIdleJobDAG(self, jobId, taskId, workerId=None):
+		self._lock.acquire()
+		if self._jobDAG.has_key(jobId):
+			self._jobDAG[jobId][taskId] = {'status': 'idle', 'workerId': workerId, 'result': None}
+		else:
+			self._jobDAG[jobId] = {taskId: {'status': 'idle', 'workerId': workerId, 'result': None}}
+		self._lock.release()
+
+	def changeStatusToIdelJobDAG(self, jobId, taskId):
+		self._lock.acquire()
+		if self._jobDAG.has_key(jobId) and self._jobDAG[jobId].has_key(taskId):
+			self._jobDAG[jobId][taskId]['status'] = 'idle'
+		self._lock.release()
+
+	def changeStatusToAssignJobDAG(self, jobId, taskId):
+		self._lock.acquire()
+		if self._jobDAG.has_key(jobId) and self._jobDAG[jobId].has_key(taskId):
+			self._jobDAG[jobId][taskId]['status'] = 'assign'
+		self._lock.release()
+
+	def changeStatusToRunJobDAG(self, jobId, taskId, workerId):
+		self._lock.acquire()
+		if self._jobDAG.has_key(jobId) and self._jobDAG[jobId].has_key(taskId):
+			self._jobDAG[jobId][taskId] = {'status': 'running', 'workerId': workerId, 'result': None}
+		self._lock.release()
+
+	def changeStatusToDoneJobDAG(self, jobId, taskId, result=None):
+		self._lock.acquire()
+		if self._jobDAG.has_key(jobId) and self._jobDAG[jobId].has_key(taskId):
+			self._jobDAG[jobId][taskId]['status'] = 'done'
+			self._jobDAG[jobId][taskId]['result'] = result
+		self._lock.release()
+
+	def changeStatusToFailJobDAG(self, jobId, taskId):
+		self._lock.acquire()
+		if self._jobDAG.has_key(jobId) and self._jobDAG[jobId].has_key(taskId):
+			self._jobDAG[jobId][taskId]['status'] = 'fail'
+		self._lock.release()
+
+	def delJobIdOnDAG(self, jobId):
+		self._lock.acquire()
+		if self._jobDAG.has_key(jobId) and self._jobDAG[jobId].has_key(taskId):
+			del self._jobDAG[jobId]
+		self._lock.release()
+
+	def getTasksOnJobDAG(self, jobId):
+		self._logger.debug('# Job Status')
+		for taskId in self._jobDAG[jobId].keys():
+			print self._jobDAG[jobId][taskId]
+			self._logger.debug(' - Job ID: %s, Task ID: %d, Status: %s, Worker ID: %s, Result: %s' %(jobId, taskId, self._jobDAG[jobId][taskId]['status'], self._jobDAG[jobId][taskId]['workerId'], self._jobDAG[jobId][taskId]['result']))
+		if self._jobDAG.has_key(jobId):
+			return self._jobDAG[jobId]
+		return None
+
+	def checkJobTaskDone(self, jobId):
+		self._logger.debug('# Check Job Done : %s' %jobId)
+		jobCompleted = True
+		if self._jobDAG.has_key(jobId):
+			tasksMap = self._jobDAG[jobId]
+			for taskId in tasksMap:
+				if tasksMap[taskId]['status'] != 'done':
+					jobCompleted = False
+					return jobCompleted
+			return jobCompleted
+		return None
