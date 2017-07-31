@@ -24,7 +24,7 @@ class HdfsHandler(HaHadoopConnector):
 
 	def ls(self, path, status=False):
 		hdfsCli = self.getConnection()
-		filePathList = [str('%s%s' %(path, fileName)) for fileName in hdfsCli.list(path)]
+		filePathList = [os.path.join(path, fileName) for fileName in hdfsCli.list(path)]
 
 		if status is not True:
 			return filePathList
@@ -38,9 +38,27 @@ class HdfsHandler(HaHadoopConnector):
 					'owner': str(fileStatus['owner']),
 					'permission': int(fileStatus['permission']),
 					'size': str(fileStatus['length']),
-					'fileType': str(fileStatus['type'])})
+					'type': str(fileStatus['type'])})
 			filePathList = statusFilePathList
 		return filePathList
+
+	def isdir(self, hdfsPath):
+		if self.status(hdfsPath)['type'] == 'DIRECTORY':
+			return True
+		return False
+
+	def isfile(self, hdfsPath):
+		if self.status(hdfsPath)['type'] == 'FILE':
+			return True
+		return False
+
+	def listdir(self, hdfsPath):
+		paths = [dirPath['filePath'] for dirPath in self.ls(hdfsPath, status=True) if dirPath['type'] == 'DIRECTORY']
+		return paths
+
+	def filedir(self, hdfsPath):
+		paths = [filePath['filePath'] for filePath in self.ls(hdfsPath, status=True) if filePath['type'] == 'FILE']
+		return paths
 
 	def exists(self, hdfsPath):
 		hdfsCli = self.getConnection()
@@ -240,7 +258,7 @@ class HdfsHandler(HaHadoopConnector):
 				self._printException(errorMsg)
 				raise Exception
 		return data
-		
+
 	def readlines(self, hdfsFilePath):
 		dataSet = None
 		retryCount = copy.deepcopy(self._retryCount)

@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 from common.util_logger import Logger
+from fs_handler.FSHandler import FSHandler
 import os
 
 PROCESS_NAME = 'DATA_ETL'
@@ -13,6 +14,8 @@ class DataEtlManager:
 		else:
 			self._logger = Logger(PROCESS_NAME).getLogger()
 		self._logger.setLevel(debugMode)
+		self._fsHandler = FSHandler(logger)
+		self._hdfsClient = self._fsHandler.getHdfsClient()
 		self._jobId = jobId
 
 	def doProcess(self, **args):
@@ -50,7 +53,9 @@ class DataEtlManager:
 		# Remove memory address & concatenate bytes
 		byteSeq = list()
 		if storageType == 'HDFS':
-			pass
+			rawData = self._hdfsClient.readlines(filePath)
+			for rawByte in rawData:
+				byteSeq += rawByte.split()[1:]
 		elif storageType == 'FILE':
 			for rawByte in open(filePath):
 				byteSeq += rawByte.split()[1:]
@@ -59,8 +64,14 @@ class DataEtlManager:
 	def __saveSequenceByteData(self, storageType, filePath, resultGramList):
 		fileName = 'temp_%s.txt' %('.').join(os.path.basename(filePath).split('.')[:-1])
 		gramData = ' '.join(resultGramList)
+
 		if storageType == 'HDFS':
-			pass
+			tempDirPath = '/'.join(filePath.split('/')[:-2] + ['temp'] + [self._jobId])
+			if not self._fsHandler.hdfsExists(tempDirPath):
+				self._hdfsClient.mkdir(tempDirPath)
+			tempFilePath = os.path.join(tempDirPath, fileName)
+			self._hdfsClient.write(gramData, tempFilePath, linefeed=True)
+
 		elif storageType == 'FILE':
 			tempDirPath = '/'.join(filePath.split('/')[:-2] + ['temp'] + [self._jobId])
 			if not os.path.exists(tempDirPath):
@@ -70,5 +81,5 @@ class DataEtlManager:
 			fd.write(gramData + "\n")
 			fd.flush()
 			fd.close()
-			print tempFilePath
-			return tempFilePath
+
+		return tempFilePath

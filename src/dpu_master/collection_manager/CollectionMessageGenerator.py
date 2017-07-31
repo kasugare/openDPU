@@ -2,12 +2,14 @@
 # -*- coding: utf-8 -*-
 
 from protocol.message_pool.MessageGenerator import getReqEtlJob
+from fs_handler.FSHandler import FSHandler
 import time
 import os
 
 class CollectionMessageGenerator:
 	def __init__(self, logger):
 		self._logger = logger
+		self._fsHandler = FSHandler(logger)
 
 	def genCollectionMessages(self, userParams):
 		jobs = userParams['jobs']
@@ -21,33 +23,29 @@ class CollectionMessageGenerator:
 			if storageType == 'FILE':
 				if os.path.exists(targetPath):
 					if os.path.isdir(targetPath):
-						filePathList += self._getFilePathInDir(targetPath)
+						filePathList += self._fsHandler.getLocalFileList(targetPath, recursive=True)
 					else:
 						filePathList.append(targetPath)
 
 			elif storageType == 'HDFS':
-				pass
+				if self._fsHandler.hdfsExists(targetPath):
+					if self._fsHandler.isdir(targetPath):
+						filePathList += self._fsHandler.getHdfsFileList(targetPath, recursive=True)
+					else:
+						filePathList.append(targetPath)
+
 		filePathList = list(set(filePathList))
+		filePathList.sort()
 
 		for index in range(len(filePathList)):
 			params = {
 				'storageType': storageType,
 				'filePath': filePathList[index]
 			}
-			protoMsgs.append(getReqEtlJob(jobType=jobs, jobId=jobId, taskId=index, params=params))
+			protoMsgs.append(getReqEtlJob(jobType=jobs, jobId=jobId, taskId=index, params=params, processType='MAP'))
 
 		self._printMsgParams(protoMsgs)
 		return jobId, protoMsgs
-
-	def _getFilePathInDir(self, dirPath):
-		filePathList = []
-		for targetName in os.listdir(dirPath):
-			targetPath = os.path.join(dirPath, targetName)
-			if os.path.isfile(targetPath):
-				filePathList.append(targetPath)
-			else:
-				filePathList += self._getFilePathInDir(targetPath)
-		return filePathList
 
 	def _printMsgParams(self, protoMsgs):
 		self._logger.info('-' * 71)
