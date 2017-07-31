@@ -100,7 +100,7 @@ def genReqJobRun(params):
 	}
 	return message
 
-def getReqEtlJob(jobType, jobId, taskId, params={}):
+def getReqEtlJob(jobType, jobId, taskId, params={}, processType=None):
 	message = {
 		'proto': 'REQ_ETL_JOB',
 		'jobType': jobType,
@@ -108,7 +108,7 @@ def getReqEtlJob(jobType, jobId, taskId, params={}):
 		'taskId': taskId,
 		'params': params,
 		'retry': 0,
-		'processType': None
+		'processType': processType
 	}
 	return message
 

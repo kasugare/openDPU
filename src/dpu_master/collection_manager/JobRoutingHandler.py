@@ -20,7 +20,6 @@ class JobRoutingHandler:
 		while True:
 			message = pickle.loads(self._clientRequestJobQueue.get())
 			self._logger.debug("# Job task assign")
-			print message
 
 			try:
 				proto = message['proto']

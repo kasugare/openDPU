@@ -94,25 +94,6 @@ class FSHandler:
 			self._logger.exception(e)
 		return localTempFilePath
 
-	def saveSiteCountryInfoToFile(self, sid, countryCode, timezone):
-		tmpLocalPath = getLocalTmpPath()
-		siteInfoFileName = 'siteinfo_%d_%s_%d.json' %(sid, countryCode, self._getUniqTimeNum())
-		localTempFilePath = '%s/%s' %(tmpLocalPath, siteInfoFileName)
-		self._logger.debug('# Save dpu meta info to file for dpu usage. file path : %s' %(localTempFilePath))
-		siteInfoMap = {
-			'site_id': str(sid),
-			'country': countryCode,
-			'timezone': timezone
-		}
-		try:
-			fd = open(localTempFilePath, 'w')
-			fd.write(json.dumps(siteInfoMap))
-			fd.flush()
-			fd.close()
-		except Exception, e:
-			self._logger.exception(e)
-		return localTempFilePath
-
 	def removeFiles(self, localFilePaths):
 		try:
 			for filePath in localFilePaths:
@@ -128,3 +109,27 @@ class FSHandler:
 			return Noe
 		return localDirPath
 
+	def getLocalFileList(self, localDirPath, recursive=False):
+		filePathList = []
+		for targetName in os.listdir(localDirPath):
+			targetPath = os.path.join(localDirPath, targetName)
+			if os.path.isfile(targetPath):
+				filePathList.append(targetPath)
+			else:
+				filePathList += self.getLocalFileList(targetPath)
+		return filePathList
+
+	def getHdfsFileList(self, hdfsPath, recursive=False):
+		filePathList = []
+		for targetPath in [str(dirPath['filePath']) for dirPath in self._hdfsClient.ls(hdfsPath, status=True)]:
+			if self._hdfsClient.isfile(targetPath):
+				filePathList.append(targetPath)
+			elif recursive:
+				filePathList += self.getHdfsFileList(targetPath)
+		return filePathList
+
+	def hdfsExists(self, hdfsPath):
+		return self._hdfsClient.exists(hdfsPath)
+
+	def isdir(self, hdfsPath):
+		return self._hdfsClient.isdir(hdfsPath)

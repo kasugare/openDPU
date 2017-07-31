@@ -326,9 +326,8 @@ class MasterResourceHandler(MasterResourcePool):
 
 	def getTasksOnJobDAG(self, jobId):
 		self._logger.debug('# Job Status')
-		for taskId in self._jobDAG[jobId].keys():
-			print self._jobDAG[jobId][taskId]
-			self._logger.debug(' - Job ID: %s, Task ID: %d, Status: %s, Worker ID: %s, Result: %s' %(jobId, taskId, self._jobDAG[jobId][taskId]['status'], self._jobDAG[jobId][taskId]['workerId'], self._jobDAG[jobId][taskId]['result']))
+		# for taskId in self._jobDAG[jobId].keys():
+		# 	self._logger.debug(' - Job ID: %s, Task ID: %d, Status: %s, Worker ID: %s, Result: %s' %(jobId, taskId, self._jobDAG[jobId][taskId]['status'], self._jobDAG[jobId][taskId]['workerId'], self._jobDAG[jobId][taskId]['result']))
 		if self._jobDAG.has_key(jobId):
 			return self._jobDAG[jobId]
 		return None

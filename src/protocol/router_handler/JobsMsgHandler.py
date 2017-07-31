@@ -67,8 +67,8 @@ class JobsMsgHandler(ProtocolAnalyzer):
 					self._resourceHandler.changeStatusToDoneJobDAG(jobId, taskId, result)
 					self._resourceHandler.getTasksOnJobDAG(jobId)
 
-					# if self._resourceHandler.checkJobTaskDone(jobId):
-					# 	self._resultReducer(jobId)
+					if self._resourceHandler.checkJobTaskDone(jobId):
+						self._resultReducer(jobId)
 
 				elif proto == 'REQ_JOB_FAIL':
 					if message.has_key('error'):
@@ -125,7 +125,6 @@ class JobsMsgHandler(ProtocolAnalyzer):
 		resultSet = []
 		for taskId in taskSet:
 			resultSet.append(taskSet[taskSet]['result'])
-		print resultSet
 
 
 
