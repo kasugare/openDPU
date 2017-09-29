@@ -59,6 +59,8 @@ data/
 log/
 logs/
 report/
+.venv/
+venv/
 
 # ETC Files
 *.pyc
