@@ -18,7 +18,7 @@ class JobManager:
 
 	def doProcess(self):
 		try:
-			self._loadJobs()
+			# self._loadJobs()
 
 			while True:
 				reqMsg = self._routerQ.get()
@@ -27,3 +27,4 @@ class JobManager:
 
 		except KeyboardInterrupt, e:
 			pass
+

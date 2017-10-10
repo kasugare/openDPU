@@ -96,9 +96,9 @@ class MasterNetworkManager:
 	def _runClusterRequestHandler(self):
 		while True:
 			print "-" * 100
-			print self._tempProviders
+			print "#", self._tempProviders
 			print "-" * 100
-			print self._providers
+			print "#", self._providers
 			print "-" * 100
 
 			try:
