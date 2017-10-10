@@ -1,0 +1,1 @@
+rainbow_logging_handler>=2.2.2
